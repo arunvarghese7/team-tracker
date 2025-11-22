@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Team Tracker Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+        .animate-fade { animation: fadeIn 0.5s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .skeleton { background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%); background-size: 200% 100%; animation: loading 2s infinite; }
+        @keyframes loading { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+        .glass-effect { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2); }
+        .status-badge { display: inline-block; padding: 0.5rem 1rem; border-radius: 0.5rem; font-size: 0.875rem; font-weight: 500; }
+        .status-completed { background-color: #dcfce7; color: #166534; }
+        .status-in-progress { background-color: #dbeafe; color: #1e40af; }
+        .status-blocked { background-color: #fee2e2; color: #991b1b; }
+        .status-not-started { background-color: #f3f4f6; color: #374151; }
+        .metric-card { transition: all 0.3s ease; }
+        .metric-card:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+    </style>
+</head>
+<body class="bg-slate-50">
+    <div id="root"></div>
+
+    <script>
+        // ============================================
+        // CONFIGURATION
+        // ============================================
+        const CONFIG = {
+            APPS_SCRIPT_URL: '', // PASTE YOUR DEPLOYMENT URL HERE
+            API_KEY: '', // PASTE YOUR API KEY HERE
+            REFRESH_INTERVAL: 300000, // 5 minutes
+            ENABLE_DEMO: true,
+            ORG_NAME: 'Your Organization', // Update this
+            LOG_REQUESTS: true
+        };
+
+        // Demo data for testing
+        const DEMO_DATA = [
+            { 'Task': 'API Integration', 'Sub-Task': 'User Auth Module', 'Engineer': 'Alice Johnson', 'Status': 'Completed', 'Start Date': '2024-10-01', 'Closure Date': '2024-10-15', 'Blocker/Dependency': '' },
+            { 'Task': 'API Integration', 'Sub-Task': 'Payment Gateway', 'Engineer': 'Bob Smith', 'Status': 'In Progress', 'Start Date': '2024-10-10', 'Closure Date': '', 'Blocker/Dependency': '' },
+            { 'Task': 'Database Migration', 'Sub-Task': 'Schema Design', 'Engineer': 'Carol Davis', 'Status': 'Completed', 'Start Date': '2024-09-15', 'Closure Date': '2024-09-30', 'Blocker/Dependency': '' },
+            { 'Task': 'Database Migration', 'Sub-Task': 'Data Transfer', 'Engineer': 'David Lee', 'Status': 'Blocked', 'Start Date': '2024-10-01', 'Closure Date': '', 'Blocker/Dependency': 'Waiting for infrastructure approval' },
+        ];
+
+        class Dashboard {
+            constructor() {
+                this.data = [];
+                this.metadata = { engineers: [], tasks: [], statuses: [] };
+                this.filters = { quarter: 'current', engineer: 'all', status: 'all', dateRange: { start: '', end: '' } };
+                this.filteredData = [];
+                this.isLoading = false;
+                this.init();
+            }
+
+            async init() {
+                this.renderLoading();
+                await this.loadData();
+                this.attachEventListeners();
+                setInterval(() => this.loadData(), CONFIG.REFRESH_INTERVAL);
+            }
+
+            renderLoading() {
+                document.getElementById('root').innerHTML = `
+                    <div class="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 flex items-center justify-center">
+                        <div class="text-center">
+                            <div class="inline-block p-3 bg-white rounded-full mb-6">
+                                <svg class="w-12 h-12 text-blue-600 animate-spin" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                            </div>
+                            <h2 class="text-2xl font-bold text-white mb-2">Loading Dashboard</h2>
+                            <p class="text-slate-400">Fetching team data...</p>
+                        </div>
+                    </div>
+                `;
+            }
+
+            async loadData() {
+                try {
+                    this.isLoading = true;
+                    
+                    if (CONFIG.ENABLE_DEMO) {
+                        this.data = DEMO_DATA;
+                        this.metadata = {
+                            engineers: [...new Set(DEMO_DATA.map(d => d.Engineer))],
+                            tasks: [...new Set(DEMO_DATA.map(d => d.Task))],
+                            statuses: [...new Set(DEMO_DATA.map(d => d.Status))]
+                        };
+                    } else {
+                        if (!CONFIG.APPS_SCRIPT_URL || !CONFIG.API_KEY) {
+                            throw new Error('Missing configuration: APPS_SCRIPT_URL or API_KEY');
+                        }
+
+                        const [dataRes, metaRes] = await Promise.all([
+                            fetch(`${CONFIG.APPS_SCRIPT_URL}?action=getData&key=${CONFIG.API_KEY}`),
+                            fetch(`${CONFIG.APPS_SCRIPT_URL}?action=getMetadata&key=${CONFIG.API_KEY}`)
+                        ]);
+
+                        const data = await dataRes.json();
+                        const meta = await metaRes.json();
+
+                        if (!data.success) throw new Error(data.message);
+                        if (!meta.success) throw new Error(meta.message);
+
+                        this.data = data.data;
+                        this.metadata = meta.data;
+                    }
+
+                    this.applyFilters();
+                    this.render();
+                    document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString();
+
+                } catch (error) {
+                    console.error('Error loading data:', error);
+                    this.showError(error.message);
+                }
+            }
+
+            applyFilters() {
+                let filtered = [...this.data];
+
+                if (this.filters.quarter !== 'all') {
+                    const range = this.getQuarterRange(this.filters.quarter);
+                    filtered = filtered.filter(item => {
+                        const date = new Date(item['Start Date']);
+                        return date >= range.start && date <= range.end;
+                    });
+                }
+
+                if (this.filters.engineer !== 'all') {
+                    filtered = filtered.filter(item => item.Engineer === this.filters.engineer);
+                }
+
+                if (this.filters.status !== 'all') {
+                    filtered = filtered.filter(item => item.Status === this.filters.status);
+                }
+
+                if (this.filters.dateRange.start && this.filters.dateRange.end) {
+                    const start = new Date(this.filters.dateRange.start);
+                    const end = new Date(this.filters.dateRange.end);
+                    filtered = filtered.filter(item => {
+                        const date = new Date(item['Start Date']);
+                        return date >= start && date <= end;
+                    });
+                }
+
+                this.filteredData = filtered;
+            }
+
+            getQuarterRange(quarterValue) {
+                if (quarterValue === 'current') {
+                    const now = new Date();
+                    const q = Math.floor(now.getMonth() / 3) + 1;
+                    quarterValue = `${now.getFullYear()}-Q${q}`;
+                }
+                const [year, q] = quarterValue.split('-Q');
+                const quarter = parseInt(q);
+                const startMonth = (quarter - 1) * 3;
+                return {
+                    start: new Date(year, startMonth, 1),
+                    end: new Date(year, startMonth + 3, 0)
+                };
+            }
+
+            getMetrics() {
+                const completed = this.filteredData.filter(d => d.Status === 'Completed').length;
+                const inProgress = this.filteredData.filter(d => d.Status === 'In Progress').length;
+                const blocked = this.filteredData.filter(d => d.Status === 'Blocked').length;
+                const notStarted = this.filteredData.filter(d => d.Status === 'Not Started').length;
+                const total = this.filteredData.length;
+
+                return {
+                    total,
+                    completed,
+                    inProgress,
+                    blocked,
+                    notStarted,
+                    completionRate: total > 0 ? Math.round((completed / total) * 100) : 0,
+                    engineers: new Set(this.filteredData.map(d => d.Engineer)).size,
+                    tasks: new Set(this.filteredData.map(d => d.Task)).size
+                };
+            }
+
+            getEngineerStats() {
+                const stats = {};
+                this.filteredData.forEach(item => {
+                    if (!stats[item.Engineer]) {
+                        stats[item.Engineer] = { total: 0, completed: 0, inProgress: 0, blocked: 0 };
+                    }
+                    stats[item.Engineer].total++;
+                    if (item.Status === 'Completed') stats[item.Engineer].completed++;
+                    if (item.Status === 'In Progress') stats[item.Engineer].inProgress++;
+                    if (item.Status === 'Blocked') stats[item.Engineer].blocked++;
+                });
+
+                return Object.entries(stats)
+                    .map(([name, data]) => ({
+                        name,
+                        ...data,
+                        rate: data.total > 0 ? Math.round((data.completed / data.total) * 100) : 0
+                    }))
+                    .sort((a, b) => b.rate - a.rate);
+            }
+
+            exportCSV() {
+                const headers = ['Task', 'Sub-Task', 'Engineer', 'Status', 'Start Date', 'Closure Date', 'Blocker/Dependency'];
+                const rows = this.filteredData.map(item => [
+                    item.Task, item['Sub-Task'], item.Engineer, item.Status,
+                    item['Start Date'], item['Closure Date'] || '-', item['Blocker/Dependency'] || '-'
+                ]);
+
+                const csv = [headers, ...rows].map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
+                const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = `team-tracker-${new Date().toISOString().split('T')[0]}.csv`;
+                link.click();
+            }
+
+            render() {
+                const metrics = this.getMetrics();
+                const engineers = this.getEngineerStats();
+
+                document.getElementById('root').innerHTML = `
+                    <div class="min-h-screen bg-slate-50">
+                        <!-- Header -->
+                        <div class="bg-gradient-to-r from-slate-900 to-slate-800 text-white sticky top-0 z-50 shadow-lg">
+                            <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+                                <div>
+                                    <h1 class="text-3xl font-bold">📊 Team Tracker Dashboard</h1>
+                                    <p class="text-slate-400 mt-1">${CONFIG.ORG_NAME}</p>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <button id="refreshBtn" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg transition flex items-center gap-2">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                                        Refresh
+                                    </button>
+                                    <div class="text-xs text-slate-400">Updated: <span id="lastUpdate">${new Date().toLocaleTimeString()}</span></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Main Content -->
+                        <div class="max-w-7xl mx-auto px-6 py-8">
+                            <!-- Filters -->
+                            <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
+                                <h3 class="font-semibold text-gray-900 mb-4">🔍 Filters</h3>
+                                <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+                                    <select id="quarterFilter" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                        <option value="current">Current Quarter</option>
+                                        <option value="all">All Time</option>
+                                        ${this.generateQuarterOptions()}
+                                    </select>
+                                    <select id="engineerFilter" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                        <option value="all">All Engineers</option>
+                                        ${this.metadata.engineers.map(e => `<option value="${e}">${e}</option>`).join('')}
+                                    </select>
+                                    <select id="statusFilter" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                        <option value="all">All Status</option>
+                                        ${this.metadata.statuses.map(s => `<option value="${s}">${s}</option>`).join('')}
+                                    </select>
+                                    <input type="date" id="startDate" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                    <input type="date" id="endDate" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                </div>
+                                <div class="mt-4 flex justify-end gap-2">
+                                    <button id="exportBtn" class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition">📥 Export CSV</button>
+                                </div>
+                            </div>
+
+                            <!-- Metrics -->
+                            <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
+                                <div class="metric-card bg-white rounded-lg shadow-sm p-6">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <span class="text-sm text-gray-600">Total Tasks</span>
+                                        <span class="text-2xl">📋</span>
+                                    </div>
+                                    <div class="text-3xl font-bold text-gray-900">${metrics.total}</div>
+                                    <div class="text-xs text-gray-500 mt-2">${metrics.tasks} main tasks</div>
+                                </div>
+                                <div class="metric-card bg-white rounded-lg shadow-sm p-6 border-t-4 border-green-500">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <span class="text-sm text-gray-600">Completed</span>
+                                        <span class="text-2xl">✅</span>
+                                    </div>
+                                    <div class="text-3xl font-bold text-green-600">${metrics.completed}</div>
+                                    <div class="text-xs text-gray-500 mt-2">${metrics.completionRate}% completion</div>
+                                </div>
+                                <div class="metric-card bg-white rounded-lg shadow-sm p-6 border-t-4 border-blue-500">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <span class="text-sm text-gray-600">In Progress</span>
+                                        <span class="text-2xl">🔄</span>
+                                    </div>
+                                    <div class="text-3xl font-bold text-blue-600">${metrics.inProgress}</div>
+                                    <div class="text-xs text-gray-500 mt-2">Active work</div>
+                                </div>
+                                <div class="metric-card bg-white rounded-lg shadow-sm p-6 border-t-4 border-red-500">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <span class="text-sm text-gray-600">Blocked</span>
+                                        <span class="text-2xl">🚫</span>
+                                    </div>
+                                    <div class="text-3xl font-bold text-red-600">${metrics.blocked}</div>
+                                    <div class="text-xs text-gray-500 mt-2">Need attention</div>
+                                </div>
+                                <div class="metric-card bg-white rounded-lg shadow-sm p-6 border-t-4 border-purple-500">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <span class="text-sm text-gray-600">Team Members</span>
+                                        <span class="text-2xl">👥</span>
+                                    </div>
+                                    <div class="text-3xl font-bold text-purple-600">${metrics.engineers}</div>
+                                    <div class="text-xs text-gray-500 mt-2">Active engineers</div>
+                                </div>
+                            </div>
+
+                            <!-- Engineer Performance -->
+                            <div class="bg-white rounded-lg shadow-sm p-6 mb-8">
+                                <h2 class="text-xl font-bold text-gray-900 mb-6">👥 Engineer Performance</h2>
+                                <div class="space-y-4">
+                                    ${engineers.map(eng => `
+                                        <div>
+                                            <div class="flex justify-between items-center mb-2">
+                                                <span class="font-medium text-gray-900">${eng.name}</span>
+                                                <span class="text-sm text-gray-600">${eng.completed}/${eng.total} completed</span>
+                                            </div>
+                                            <div class="flex items-center gap-3">
+                                                <div class="flex-1 bg-gray-100 rounded-full h-2">
+                                                    <div class="bg-gradient-to-r from-blue-400 to-blue-600 h-2 rounded-full" style="width: ${eng.rate}%"></div>
+                                                </div>
+                                                <span class="text-sm font-semibold text-gray-700 w-12 text-right">${eng.rate}%</span>
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+
+                            <!-- Data Table -->
+                            <div class="bg-white rounded-lg shadow-sm p-6">
+                                <h2 class="text-xl font-bold text-gray-900 mb-6">📋 Activity Log</h2>
+                                <div class="overflow-x-auto">
+                                    <table class="w-full text-sm">
+                                        <thead class="border-b-2 border-gray-200">
+                                            <tr>
+                                                <th class="text-left py-3 px-4 font-semibold text-gray-700">Task</th>
+                                                <th class="text-left py-3 px-4 font-semibold text-gray-700">Sub-Task</th>
+                                                <th class="text-left py-3 px-4 font-semibold text-gray-700">Engineer</th>
+                                                <th class="text-center py-3 px-4 font-semibold text-gray-700">Status</th>
+                                                <th class="text-center py-3 px-4 font-semibold text-gray-700">Dates</th>
+                                                <th class="text-left py-3 px-4 font-semibold text-gray-700">Notes</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            ${this.filteredData.map(item => `
+                                                <tr class="border-b border-gray-100 hover:bg-gray-50">
+                                                    <td class="py-3 px-4 text-gray-900">${item.Task}</td>
+                                                    <td class="py-3 px-4 text-gray-700">${item['Sub-Task']}</td>
+                                                    <td class="py-3 px-4 text-gray-900 font-medium">${item.Engineer}</td>
+                                                    <td class="py-3 px-4 text-center">
+                                                        <span class="status-badge status-${item.Status.toLowerCase().replace(' ', '-')}">${item.Status}</span>
+                                                    </td>
+                                                    <td class="py-3 px-4 text-center text-xs text-gray-600">
+                                                        ${item['Start Date']}<br>${item['Closure Date'] || '–'}
+                                                    </td>
+                                                    <td class="py-3 px-4 text-gray-600">${item['Blocker/Dependency'] || '–'}</td>
+                                                </tr>
+                                            `).join('')}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                this.attachEventListeners();
+            }
+
+            generateQuarterOptions() {
+                const year = new Date().getFullYear();
+                const options = [];
+                for (let y = year - 1; y <= year + 1; y++) {
+                    for (let q = 1; q <= 4; q++) {
+                        options.push(`<option value="${y}-Q${q}">Q${q} ${y}</option>`);
+                    }
+                }
+                return options.join('');
+            }
+
+            attachEventListeners() {
+                document.getElementById('refreshBtn')?.addEventListener('click', () => this.loadData());
+                document.getElementById('exportBtn')?.addEventListener('click', () => this.exportCSV());
+                document.getElementById('quarterFilter')?.addEventListener('change', (e) => {
+                    this.filters.quarter = e.target.value;
+                    this.applyFilters();
+                    this.render();
+                });
+                document.getElementById('engineerFilter')?.addEventListener('change', (e) => {
+                    this.filters.engineer = e.target.value;
+                    this.applyFilters();
+                    this.render();
+                });
+                document.getElementById('statusFilter')?.addEventListener('change', (e) => {
+                    this.filters.status = e.target.value;
+                    this.applyFilters();
+                    this.render();
+                });
+                document.getElementById('startDate')?.addEventListener('change', (e) => {
+                    this.filters.dateRange.start = e.target.value;
+                    this.applyFilters();
+                    this.render();
+                });
+                document.getElementById('endDate')?.addEventListener('change', (e) => {
+                    this.filters.dateRange.end = e.target.value;
+                    this.applyFilters();
+                    this.render();
+                });
+            }
+
+            showError(message) {
+                document.getElementById('root').innerHTML = `
+                    <div class="min-h-screen bg-gradient-to-br from-red-50 to-red-100 flex items-center justify-center p-6">
+                        <div class="bg-white rounded-lg shadow-lg p-8 max-w-md">
+                            <div class="text-center">
+                                <div class="text-5xl mb-4">⚠️</div>
+                                <h2 class="text-2xl font-bold text-red-600 mb-2">Configuration Error</h2>
+                                <p class="text-gray-600 mb-6">${message}</p>
+                                <button onclick="location.reload()" class="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+                                    Retry
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            new Dashboard();
+        });
+    </script>
+</body>
+</html>
