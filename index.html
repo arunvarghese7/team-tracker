@@ -3,213 +3,561 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Team Tracker Dashboard</title>
+    <title>IT Team Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { 
+        
+        body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', sans-serif;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            min-height: 100vh;
+            background: #f5f5f7;
+            color: #1d1d1f;
         }
-        .glass-card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.15);
-        }
-        .metric-card {
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative;
-            overflow: hidden;
-        }
-        .metric-card::before {
-            content: '';
-            position: absolute;
+
+        /* Apple-style Navigation */
+        .nav-bar {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            position: sticky;
             top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-            transition: left 0.5s;
+            z-index: 100;
         }
-        .metric-card:hover::before {
-            left: 100%;
+
+        .nav-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
-        .metric-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 12px 40px rgba(31, 38, 135, 0.25);
-        }
-        .badge {
-            display: inline-block;
-            padding: 0.35rem 0.85rem;
-            border-radius: 9999px;
-            font-size: 0.75rem;
+
+        .logo {
+            font-size: 1.5rem;
             font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: -0.5px;
         }
-        .badge-completed { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; }
-        .badge-in-progress { background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); color: white; }
-        .badge-blocked { background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; }
-        .badge-not-started { background: linear-gradient(135deg, #6b7280 0%, #374151 100%); color: white; }
-        .progress-bar {
-            background: linear-gradient(90deg, #e5e7eb 0%, #d1d5db 100%);
-            border-radius: 10px;
-            height: 8px;
-            overflow: hidden;
+
+        .nav-actions {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
         }
-        .progress-fill {
-            background: linear-gradient(90deg, #3b82f6 0%, #1d4ed8 100%);
-            height: 100%;
-            border-radius: 10px;
-            transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+
+        /* Hero Section */
+        .hero-section {
+            background: linear-gradient(180deg, #f5f5f7 0%, #ffffff 100%);
+            padding: 4rem 2rem;
+            text-align: center;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
         }
-        .chart-container {
-            position: relative;
-            height: 300px;
-            margin: 20px 0;
+
+        .hero-content {
+            max-width: 900px;
+            margin: 0 auto;
         }
+
+        .hero-title {
+            font-size: 3.5rem;
+            font-weight: 700;
+            letter-spacing: -1px;
+            margin-bottom: 1rem;
+            line-height: 1.1;
+        }
+
+        .hero-subtitle {
+            font-size: 1.25rem;
+            color: #666;
+            margin-bottom: 2rem;
+            font-weight: 500;
+        }
+
+        /* Main Container */
+        .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        /* Filter Bar - Apple Style */
+        .filter-section {
+            padding: 2rem 0;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .filter-bar {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .filter-input {
+            padding: 0.75rem 1.25rem;
+            border: 1px solid rgba(0, 0, 0, 0.15);
+            border-radius: 0.5rem;
+            background: white;
+            font-size: 0.9375rem;
+            transition: all 0.2s;
+            font-family: inherit;
+            cursor: pointer;
+        }
+
+        .filter-input:hover {
+            border-color: rgba(0, 0, 0, 0.3);
+            background: #f9f9f9;
+        }
+
+        .filter-input:focus {
+            outline: none;
+            border-color: #0071e3;
+            box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.1);
+        }
+
         .filter-chip {
             display: inline-block;
-            padding: 0.5rem 1rem;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border-radius: 20px;
+            padding: 0.6rem 1.2rem;
+            background: white;
+            border: 1px solid rgba(0, 0, 0, 0.15);
+            border-radius: 50px;
             font-size: 0.875rem;
             font-weight: 500;
-            margin: 0.25rem;
             cursor: pointer;
-            transition: all 0.3s;
-            border: 2px solid transparent;
-        }
-        .filter-chip:hover {
-            transform: scale(1.05);
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-        }
-        .filter-chip.active {
-            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
-            border-color: white;
-            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
-        }
-        .table-row:hover {
-            background-color: rgba(59, 130, 246, 0.05);
-            transform: scale(1.01);
             transition: all 0.2s;
+            white-space: nowrap;
         }
-        .skeleton {
-            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-            background-size: 200% 100%;
-            animation: loading 2s infinite;
+
+        .filter-chip:hover {
+            border-color: rgba(0, 0, 0, 0.3);
+            background: #f9f9f9;
         }
-        @keyframes loading { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
-        .header-gradient {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+
+        .filter-chip.active {
+            background: #0071e3;
+            color: white;
+            border-color: #0071e3;
         }
+
+        .date-display {
+            padding: 0.75rem 1.25rem;
+            background: #f5f5f7;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #666;
+        }
+
+        .clear-btn {
+            padding: 0.75rem 1.5rem;
+            background: white;
+            border: 1px solid rgba(0, 0, 0, 0.15);
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-left: auto;
+        }
+
+        .clear-btn:hover {
+            background: #f5f5f7;
+            border-color: rgba(0, 0, 0, 0.3);
+        }
+
+        /* Stats Section */
+        .stats-section {
+            padding: 3rem 0;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+        }
+
+        .stat-card {
+            text-align: center;
+            padding: 2rem;
+            background: white;
+            border-radius: 1rem;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            transition: all 0.3s;
+        }
+
+        .stat-card:hover {
+            border-color: rgba(0, 0, 0, 0.2);
+            transform: translateY(-2px);
+        }
+
         .stat-number {
             font-size: 2.5rem;
             font-weight: 700;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            color: #0071e3;
+            margin-bottom: 0.5rem;
         }
-        .clear-btn {
-            background: rgba(239, 68, 68, 0.1);
-            color: #ef4444;
-            border: 1px solid #fed7d7;
-            padding: 0.5rem 1rem;
-            border-radius: 0.5rem;
-            font-size: 0.875rem;
-            cursor: pointer;
-            transition: all 0.2s;
-            font-weight: 500;
-        }
-        .clear-btn:hover {
-            background: rgba(239, 68, 68, 0.2);
-            border-color: #f87171;
-        }
-        select, input[type="date"] {
-            background-color: white;
-            border: 2px solid #e5e7eb;
-            padding: 0.75rem 1rem;
-            border-radius: 0.5rem;
+
+        .stat-label {
             font-size: 0.9375rem;
-            transition: all 0.2s;
+            color: #666;
             font-weight: 500;
-            color: #374151;
         }
-        select:focus, input[type="date"]:focus {
-            outline: none;
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+
+        /* Cards Section */
+        .cards-section {
+            padding: 3rem 0;
         }
-        .table-container {
-            overflow-x: auto;
-            border-radius: 0.75rem;
+
+        .section-title {
+            font-size: 2rem;
+            font-weight: 600;
+            margin-bottom: 2rem;
+            letter-spacing: -0.5px;
         }
+
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .card {
+            background: white;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .card:hover {
+            border-color: rgba(0, 0, 0, 0.2);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+            transform: translateY(-4px);
+        }
+
+        .card-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+        }
+
+        .card-subtitle {
+            font-size: 0.875rem;
+            color: #666;
+            margin-bottom: 1.5rem;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #e5e5ea;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-bottom: 0.75rem;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #0071e3 0%, #0050c0 100%);
+            transition: width 0.5s ease;
+            border-radius: 3px;
+        }
+
+        .progress-label {
+            font-size: 0.8125rem;
+            color: #666;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        /* Badge */
+        .badge {
+            display: inline-block;
+            padding: 0.35rem 0.75rem;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            margin-bottom: 1rem;
+        }
+
+        .badge-completed {
+            background: #34c759;
+            color: white;
+        }
+
+        .badge-in-progress {
+            background: #0071e3;
+            color: white;
+        }
+
+        .badge-blocked {
+            background: #ff3b30;
+            color: white;
+        }
+
+        .badge-not-started {
+            background: #a2a2a7;
+            color: white;
+        }
+
+        /* Table Section */
+        .table-section {
+            padding: 3rem 0;
+        }
+
+        .table-wrapper {
+            background: white;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 1rem;
+            overflow: hidden;
+        }
+
         table {
             width: 100%;
             border-collapse: collapse;
         }
+
         th {
-            background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
-            padding: 1rem;
+            background: #f5f5f7;
+            padding: 1.25rem;
             text-align: left;
             font-weight: 600;
-            color: #374151;
-            border-bottom: 2px solid #e5e7eb;
             font-size: 0.875rem;
+            color: #666;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.3px;
         }
+
         td {
-            padding: 1rem;
-            border-bottom: 1px solid #f3f4f6;
-            color: #6b7280;
+            padding: 1.25rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+            font-size: 0.9375rem;
         }
+
+        tr:hover {
+            background: #f9f9f9;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* Empty State */
         .empty-state {
             text-align: center;
-            padding: 3rem;
-            color: #9ca3af;
+            padding: 3rem 2rem;
+            color: #666;
         }
-        .empty-state svg {
-            width: 64px;
-            height: 64px;
-            margin: 0 auto 1rem;
-            opacity: 0.5;
+
+        .empty-state-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
         }
+
+        .empty-state-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #1d1d1f;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: white;
+            border-radius: 1.5rem;
+            padding: 2rem;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid rgba(0, 0, 0, 0.15);
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+            font-size: 0.9375rem;
+            font-family: inherit;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .btn-primary {
+            flex: 1;
+            padding: 0.75rem 1.5rem;
+            background: #0071e3;
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary:hover {
+            background: #0050c0;
+        }
+
+        .btn-secondary {
+            flex: 1;
+            padding: 0.75rem 1.5rem;
+            background: #f5f5f7;
+            color: #1d1d1f;
+            border: none;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-secondary:hover {
+            background: #e8e8ed;
+        }
+
         .spinner {
             display: inline-block;
             width: 20px;
             height: 20px;
-            border: 3px solid rgba(59, 130, 246, 0.2);
+            border: 2px solid rgba(0, 113, 227, 0.2);
+            border-top-color: #0071e3;
             border-radius: 50%;
-            border-top-color: #3b82f6;
             animation: spin 0.8s linear infinite;
         }
+
         @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
-    <div id="root"></div>
+    <!-- Navigation -->
+    <div class="nav-bar">
+        <div class="nav-content">
+            <div class="logo">📊 Team Tracker</div>
+            <div class="nav-actions">
+                <button id="refreshBtn" style="padding: 0.5rem 1rem; background: #f5f5f7; border: none; border-radius: 0.5rem; cursor: pointer; font-weight: 500; transition: all 0.2s;" onmouseover="this.style.background='#e8e8ed'" onmouseout="this.style.background='#f5f5f7'">🔄 Refresh</button>
+                <div style="font-size: 0.875rem; color: #666;">Last updated: <span id="lastUpdate">now</span></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hero Section -->
+    <div class="hero-section">
+        <div class="hero-content">
+            <h1 class="hero-title">Team Performance Dashboard</h1>
+            <p class="hero-subtitle">Real-time insights into team's progress and productivity</p>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-container">
+        <!-- Filters Section -->
+        <div class="filter-section">
+            <div class="filter-bar">
+                <input type="date" id="startDate" class="filter-input" placeholder="Start Date">
+                <input type="date" id="endDate" class="filter-input" placeholder="End Date">
+                <div class="date-display" id="dateDisplay">Select date range</div>
+                <button class="clear-btn" onclick="dashboard.clearAllFilters()">Clear Filters</button>
+                <button class="clear-btn" id="exportBtn" style="margin-left: 0.5rem; background: #0071e3; color: white; border-color: #0071e3;">📥 Export</button>
+            </div>
+
+            <!-- Engineer Filters -->
+            <div style="margin-bottom: 1.5rem;">
+                <div style="font-size: 0.875rem; font-weight: 600; color: #666; margin-bottom: 0.75rem; text-transform: uppercase; letter-spacing: 0.3px;">Engineers</div>
+                <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;" id="engineerFilters"></div>
+            </div>
+
+            <!-- Status Filters -->
+            <div>
+                <div style="font-size: 0.875rem; font-weight: 600; color: #666; margin-bottom: 0.75rem; text-transform: uppercase; letter-spacing: 0.3px;">Status</div>
+                <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;" id="statusFilters"></div>
+            </div>
+        </div>
+
+        <!-- Stats Section -->
+        <div class="stats-section">
+            <div class="stats-grid" id="statsGrid"></div>
+        </div>
+
+        <!-- Engineer Performance Cards -->
+        <div class="cards-section">
+            <h2 class="section-title">Engineer Performance</h2>
+            <div class="cards-grid" id="engineerCards"></div>
+        </div>
+
+        <!-- Data Table -->
+        <div class="table-section">
+            <h2 class="section-title">Team Activity</h2>
+            <div class="table-wrapper">
+                <div id="tableContent"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Date Range -->
+    <div class="modal-overlay" id="dateModal">
+        <div class="modal">
+            <div class="modal-title">Select Date Range</div>
+            <input type="date" id="modalStart" class="modal-input" placeholder="Start Date">
+            <input type="date" id="modalEnd" class="modal-input" placeholder="End Date">
+            <div class="modal-buttons">
+                <button class="btn-secondary" onclick="document.getElementById('dateModal').classList.remove('active')">Cancel</button>
+                <button class="btn-primary" onclick="dashboard.applyDateRangeFromModal()">Apply</button>
+            </div>
+        </div>
+    </div>
 
     <script>
         const CONFIG = {
-            APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbz1jIz73VKcat6GmkqovmqtXHyago4bimxxeaVWekniYU_lowq-e4t9FV1r2PSUqziIKw/exec', // PASTE YOUR DEPLOYMENT URL HERE
-            API_KEY: 'c5b7c1f7-36b5-4a65-8134-adab9feba0c7', // PASTE YOUR API KEY HERE
+            APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbz1jIz73VKcat6GmkqovmqtXHyago4bimxxeaVWekniYU_lowq-e4t9FV1r2PSUqziIKw/exec',
+            API_KEY: 'c5b7c1f7-36b5-4a65-8134-adab9feba0c7',
             REFRESH_INTERVAL: 300000,
             ENABLE_DEMO: false,
-            ORG_NAME: 'MoEngage'
+            ORG_NAME: 'Your Organization'
         };
 
         const DEMO_DATA = [
-            { 'Task': 'API Integration', 'Sub-Task': 'User Auth Module', 'Engineer': 'Alice Johnson', 'Status': 'Completed', 'Start Date': '2024-10-01', 'Closure Date': '2024-10-15', 'Blocker/Dependency': '' },
-            { 'Task': 'API Integration', 'Sub-Task': 'Payment Gateway', 'Engineer': 'Bob Smith', 'Status': 'In Progress', 'Start Date': '2024-10-10', 'Closure Date': '', 'Blocker/Dependency': '' },
-            { 'Task': 'Database Migration', 'Sub-Task': 'Schema Design', 'Engineer': 'Carol Davis', 'Status': 'Completed', 'Start Date': '2024-09-15', 'Closure Date': '2024-09-30', 'Blocker/Dependency': '' },
-            { 'Task': 'Database Migration', 'Sub-Task': 'Data Transfer', 'Engineer': 'David Lee', 'Status': 'Blocked', 'Start Date': '2024-10-01', 'Closure Date': '', 'Blocker/Dependency': 'Waiting for infrastructure' },
-            { 'Task': 'Frontend Redesign', 'Sub-Task': 'Homepage Layout', 'Engineer': 'Emma Wilson', 'Status': 'Completed', 'Start Date': '2024-11-01', 'Closure Date': '2024-11-10', 'Blocker/Dependency': '' },
+            { 'Task': 'API Integration', 'Sub-Task': 'User Auth', 'Engineer': 'Alice Johnson', 'Status': 'Completed', 'Start Date': '2024-10-01', 'Closure Date': '2024-10-15', 'Blocker/Dependency': '' },
+            { 'Task': 'API Integration', 'Sub-Task': 'Payment', 'Engineer': 'Bob Smith', 'Status': 'In Progress', 'Start Date': '2024-10-10', 'Closure Date': '', 'Blocker/Dependency': '' },
+            { 'Task': 'Database Migration', 'Sub-Task': 'Schema', 'Engineer': 'Carol Davis', 'Status': 'Completed', 'Start Date': '2024-09-15', 'Closure Date': '2024-09-30', 'Blocker/Dependency': '' },
+            { 'Task': 'Database Migration', 'Sub-Task': 'Data Transfer', 'Engineer': 'David Lee', 'Status': 'Blocked', 'Start Date': '2024-10-01', 'Closure Date': '', 'Blocker/Dependency': 'Waiting for approval' },
+            { 'Task': 'Frontend Redesign', 'Sub-Task': 'Homepage', 'Engineer': 'Emma Wilson', 'Status': 'Completed', 'Start Date': '2024-11-01', 'Closure Date': '2024-11-10', 'Blocker/Dependency': '' },
             { 'Task': 'Frontend Redesign', 'Sub-Task': 'Dashboard', 'Engineer': 'Frank Brown', 'Status': 'In Progress', 'Start Date': '2024-11-05', 'Closure Date': '', 'Blocker/Dependency': '' },
         ];
 
@@ -219,34 +567,17 @@
                 this.filteredData = [];
                 this.metadata = { engineers: [], tasks: [], statuses: [] };
                 this.filters = {
-                    quarter: 'current',
                     engineers: [],
                     statuses: [],
                     dateRange: { start: '', end: '' }
                 };
-                this.chartsInitialized = false;
                 this.init();
             }
 
             async init() {
-                this.renderLoading();
                 await this.loadData();
                 this.render();
                 setInterval(() => this.loadData(), CONFIG.REFRESH_INTERVAL);
-            }
-
-            renderLoading() {
-                document.getElementById('root').innerHTML = `
-                    <div class="min-h-screen flex items-center justify-center">
-                        <div class="text-center">
-                            <div class="inline-block mb-4">
-                                <div class="spinner"></div>
-                            </div>
-                            <h2 class="text-2xl font-bold text-gray-800">Loading Dashboard</h2>
-                            <p class="text-gray-600 mt-2">Fetching team data...</p>
-                        </div>
-                    </div>
-                `;
             }
 
             async loadData() {
@@ -260,7 +591,7 @@
                         };
                     } else {
                         if (!CONFIG.APPS_SCRIPT_URL || !CONFIG.API_KEY) {
-                            throw new Error('Configuration missing: APPS_SCRIPT_URL or API_KEY');
+                            throw new Error('Missing CONFIG: APPS_SCRIPT_URL or API_KEY');
                         }
 
                         const [dataRes, metaRes] = await Promise.all([
@@ -280,23 +611,14 @@
 
                     this.applyFilters();
                     this.render();
-
                 } catch (error) {
-                    console.error('Error loading data:', error);
-                    this.showError(error.message);
+                    console.error('Error:', error);
+                    alert('Error loading data: ' + error.message);
                 }
             }
 
             applyFilters() {
                 let filtered = [...this.data];
-
-                if (this.filters.quarter !== 'all') {
-                    const range = this.getQuarterRange(this.filters.quarter);
-                    filtered = filtered.filter(item => {
-                        const date = new Date(item['Start Date']);
-                        return date >= range.start && date <= range.end;
-                    });
-                }
 
                 if (this.filters.engineers.length > 0) {
                     filtered = filtered.filter(item => this.filters.engineers.includes(item.Engineer));
@@ -316,86 +638,6 @@
                 }
 
                 this.filteredData = filtered;
-            }
-
-            getQuarterRange(quarterValue) {
-                if (quarterValue === 'current') {
-                    const now = new Date();
-                    const q = Math.floor(now.getMonth() / 3) + 1;
-                    quarterValue = `${now.getFullYear()}-Q${q}`;
-                }
-                const [year, q] = quarterValue.split('-Q');
-                const quarter = parseInt(q);
-                const startMonth = (quarter - 1) * 3;
-                return {
-                    start: new Date(year, startMonth, 1),
-                    end: new Date(year, startMonth + 3, 0)
-                };
-            }
-
-            getMetrics() {
-                const completed = this.filteredData.filter(d => d.Status === 'Completed').length;
-                const inProgress = this.filteredData.filter(d => d.Status === 'In Progress').length;
-                const blocked = this.filteredData.filter(d => d.Status === 'Blocked').length;
-                const notStarted = this.filteredData.filter(d => d.Status === 'Not Started').length;
-                const total = this.filteredData.length;
-
-                return {
-                    total,
-                    completed,
-                    inProgress,
-                    blocked,
-                    notStarted,
-                    completionRate: total > 0 ? Math.round((completed / total) * 100) : 0,
-                    engineers: new Set(this.filteredData.map(d => d.Engineer)).size,
-                    tasks: new Set(this.filteredData.map(d => d.Task)).size
-                };
-            }
-
-            getEngineerStats() {
-                const stats = {};
-                this.filteredData.forEach(item => {
-                    if (!stats[item.Engineer]) {
-                        stats[item.Engineer] = { total: 0, completed: 0, inProgress: 0, blocked: 0 };
-                    }
-                    stats[item.Engineer].total++;
-                    if (item.Status === 'Completed') stats[item.Engineer].completed++;
-                    if (item.Status === 'In Progress') stats[item.Engineer].inProgress++;
-                    if (item.Status === 'Blocked') stats[item.Engineer].blocked++;
-                });
-
-                return Object.entries(stats)
-                    .map(([name, data]) => ({
-                        name,
-                        ...data,
-                        rate: data.total > 0 ? Math.round((data.completed / data.total) * 100) : 0
-                    }))
-                    .sort((a, b) => b.rate - a.rate);
-            }
-
-            getStatusDistribution() {
-                const counts = {
-                    'Completed': this.filteredData.filter(d => d.Status === 'Completed').length,
-                    'In Progress': this.filteredData.filter(d => d.Status === 'In Progress').length,
-                    'Blocked': this.filteredData.filter(d => d.Status === 'Blocked').length,
-                    'Not Started': this.filteredData.filter(d => d.Status === 'Not Started').length
-                };
-                return counts;
-            }
-
-            exportCSV() {
-                const headers = ['Task', 'Sub-Task', 'Engineer', 'Status', 'Start Date', 'Closure Date', 'Blocker/Dependency'];
-                const rows = this.filteredData.map(item => [
-                    item.Task, item['Sub-Task'], item.Engineer, item.Status,
-                    item['Start Date'], item['Closure Date'] || '-', item['Blocker/Dependency'] || '-'
-                ]);
-
-                const csv = [headers, ...rows].map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
-                const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-                const link = document.createElement('a');
-                link.href = URL.createObjectURL(blob);
-                link.download = `team-tracker-${new Date().toISOString().split('T')[0]}.csv`;
-                link.click();
             }
 
             toggleEngineerFilter(engineer) {
@@ -421,331 +663,221 @@
             }
 
             clearAllFilters() {
-                this.filters = {
-                    quarter: 'current',
-                    engineers: [],
-                    statuses: [],
-                    dateRange: { start: '', end: '' }
-                };
-                document.getElementById('quarterFilter').value = 'current';
+                this.filters = { engineers: [], statuses: [], dateRange: { start: '', end: '' } };
                 document.getElementById('startDate').value = '';
                 document.getElementById('endDate').value = '';
+                document.getElementById('dateDisplay').textContent = 'Select date range';
                 this.applyFilters();
                 this.render();
             }
 
+            applyDateRangeFromModal() {
+                const start = document.getElementById('modalStart').value;
+                const end = document.getElementById('modalEnd').value;
+                if (start && end) {
+                    this.filters.dateRange = { start, end };
+                    document.getElementById('startDate').value = start;
+                    document.getElementById('endDate').value = end;
+                    this.updateDateDisplay();
+                    document.getElementById('dateModal').classList.remove('active');
+                    this.applyFilters();
+                    this.render();
+                }
+            }
+
+            updateDateDisplay() {
+                const start = this.filters.dateRange.start;
+                const end = this.filters.dateRange.end;
+                if (start && end) {
+                    document.getElementById('dateDisplay').textContent = `${start} to ${end}`;
+                }
+            }
+
+            getMetrics() {
+                const completed = this.filteredData.filter(d => d.Status === 'Completed').length;
+                const inProgress = this.filteredData.filter(d => d.Status === 'In Progress').length;
+                const blocked = this.filteredData.filter(d => d.Status === 'Blocked').length;
+                const total = this.filteredData.length;
+
+                return {
+                    total,
+                    completed,
+                    inProgress,
+                    blocked,
+                    completionRate: total > 0 ? Math.round((completed / total) * 100) : 0
+                };
+            }
+
+            getEngineerStats() {
+                const stats = {};
+                this.filteredData.forEach(item => {
+                    if (!stats[item.Engineer]) {
+                        stats[item.Engineer] = { total: 0, completed: 0, inProgress: 0, blocked: 0 };
+                    }
+                    stats[item.Engineer].total++;
+                    if (item.Status === 'Completed') stats[item.Engineer].completed++;
+                    if (item.Status === 'In Progress') stats[item.Engineer].inProgress++;
+                    if (item.Status === 'Blocked') stats[item.Engineer].blocked++;
+                });
+
+                return Object.entries(stats)
+                    .map(([name, data]) => ({
+                        name,
+                        ...data,
+                        rate: data.total > 0 ? Math.round((data.completed / data.total) * 100) : 0
+                    }))
+                    .sort((a, b) => b.rate - a.rate);
+            }
+
+            exportCSV() {
+                const headers = ['Task', 'Sub-Task', 'Engineer', 'Status', 'Start Date', 'Closure Date', 'Blocker/Dependency'];
+                const rows = this.filteredData.map(item => [
+                    item.Task, item['Sub-Task'], item.Engineer, item.Status,
+                    item['Start Date'], item['Closure Date'] || '-', item['Blocker/Dependency'] || '-'
+                ]);
+
+                const csv = [headers, ...rows].map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
+                const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = `team-tracker-${new Date().toISOString().split('T')[0]}.csv`;
+                link.click();
+            }
+
             render() {
-                const metrics = this.getMetrics();
-                const engineers = this.getEngineerStats();
-                const statusDist = this.getStatusDistribution();
-
-                document.getElementById('root').innerHTML = `
-                    <div class="min-h-screen">
-                        <!-- Header -->
-                        <header class="header-gradient sticky top-0 z-50 shadow-xl">
-                            <div class="max-w-7xl mx-auto px-6 py-6">
-                                <div class="flex justify-between items-center">
-                                    <div>
-                                        <h1 class="text-4xl font-bold text-white">📊 Team Tracker</h1>
-                                        <p class="text-purple-100 mt-1">${CONFIG.ORG_NAME}</p>
-                                    </div>
-                                    <div class="flex items-center gap-3">
-                                        <button id="refreshBtn" class="px-4 py-2 bg-white bg-opacity-20 hover:bg-opacity-30 text-white rounded-lg transition font-medium flex items-center gap-2 backdrop-blur">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
-                                            Refresh
-                                        </button>
-                                        <div class="text-xs text-purple-100">Updated: <span id="lastUpdate">${new Date().toLocaleTimeString()}</span></div>
-                                    </div>
-                                </div>
-                            </div>
-                        </header>
-
-                        <!-- Main Content -->
-                        <main class="max-w-7xl mx-auto px-6 py-8">
-                            <!-- Metrics Row -->
-                            <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
-                                <div class="glass-card metric-card rounded-xl p-6">
-                                    <div class="flex items-center justify-between mb-3">
-                                        <span class="text-sm text-gray-600 font-semibold">Total Tasks</span>
-                                        <span class="text-3xl">📋</span>
-                                    </div>
-                                    <div class="stat-number">${metrics.total}</div>
-                                    <div class="text-xs text-gray-500 mt-2">${metrics.tasks} main tasks</div>
-                                </div>
-                                <div class="glass-card metric-card rounded-xl p-6 border-t-4 border-green-500">
-                                    <div class="flex items-center justify-between mb-3">
-                                        <span class="text-sm text-gray-600 font-semibold">Completed</span>
-                                        <span class="text-3xl">✅</span>
-                                    </div>
-                                    <div class="stat-number">${metrics.completed}</div>
-                                    <div class="text-xs text-gray-500 mt-2">${metrics.completionRate}% complete</div>
-                                </div>
-                                <div class="glass-card metric-card rounded-xl p-6 border-t-4 border-blue-500">
-                                    <div class="flex items-center justify-between mb-3">
-                                        <span class="text-sm text-gray-600 font-semibold">In Progress</span>
-                                        <span class="text-3xl">🔄</span>
-                                    </div>
-                                    <div class="stat-number">${metrics.inProgress}</div>
-                                    <div class="text-xs text-gray-500 mt-2">Active work</div>
-                                </div>
-                                <div class="glass-card metric-card rounded-xl p-6 border-t-4 border-red-500">
-                                    <div class="flex items-center justify-between mb-3">
-                                        <span class="text-sm text-gray-600 font-semibold">Blocked</span>
-                                        <span class="text-3xl">🚫</span>
-                                    </div>
-                                    <div class="stat-number">${metrics.blocked}</div>
-                                    <div class="text-xs text-gray-500 mt-2">Need attention</div>
-                                </div>
-                                <div class="glass-card metric-card rounded-xl p-6 border-t-4 border-purple-500">
-                                    <div class="flex items-center justify-between mb-3">
-                                        <span class="text-sm text-gray-600 font-semibold">Team</span>
-                                        <span class="text-3xl">👥</span>
-                                    </div>
-                                    <div class="stat-number">${metrics.engineers}</div>
-                                    <div class="text-xs text-gray-500 mt-2">Active engineers</div>
-                                </div>
-                            </div>
-
-                            <!-- Filters Section -->
-                            <div class="glass-card rounded-xl p-6 mb-8">
-                                <div class="flex items-center justify-between mb-6">
-                                    <h2 class="text-lg font-bold text-gray-900">🔍 Advanced Filters</h2>
-                                    <button class="clear-btn" onclick="dashboard.clearAllFilters()">Clear All</button>
-                                </div>
-
-                                <!-- Quarter & Date Filters -->
-                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                                    <div>
-                                        <label class="block text-sm font-semibold text-gray-700 mb-2">Quarter</label>
-                                        <select id="quarterFilter" class="w-full">
-                                            <option value="current">Current Quarter</option>
-                                            <option value="all">All Time</option>
-                                            ${this.generateQuarterOptions()}
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-semibold text-gray-700 mb-2">Start Date</label>
-                                        <input type="date" id="startDate" class="w-full">
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-semibold text-gray-700 mb-2">End Date</label>
-                                        <input type="date" id="endDate" class="w-full">
-                                    </div>
-                                </div>
-
-                                <!-- Engineer Filters -->
-                                <div class="mb-6">
-                                    <label class="block text-sm font-semibold text-gray-700 mb-3">Engineers</label>
-                                    <div class="flex flex-wrap gap-2">
-                                        ${this.metadata.engineers.map(eng => `
-                                            <button class="filter-chip ${this.filters.engineers.includes(eng) ? 'active' : ''}" onclick="dashboard.toggleEngineerFilter('${eng}')">
-                                                ${eng}
-                                            </button>
-                                        `).join('')}
-                                    </div>
-                                </div>
-
-                                <!-- Status Filters -->
-                                <div class="mb-4">
-                                    <label class="block text-sm font-semibold text-gray-700 mb-3">Status</label>
-                                    <div class="flex flex-wrap gap-2">
-                                        ${this.metadata.statuses.map(status => `
-                                            <button class="filter-chip ${this.filters.statuses.includes(status) ? 'active' : ''}" onclick="dashboard.toggleStatusFilter('${status}')">
-                                                ${status}
-                                            </button>
-                                        `).join('')}
-                                    </div>
-                                </div>
-
-                                <!-- Export Button -->
-                                <div class="flex justify-end pt-4 border-t border-gray-200">
-                                    <button id="exportBtn" class="px-6 py-2 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg hover:shadow-lg transition font-semibold flex items-center gap-2">
-                                        📥 Export CSV
-                                    </button>
-                                </div>
-                            </div>
-
-                            <!-- Charts Row -->
-                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-                                <!-- Status Distribution -->
-                                <div class="glass-card rounded-xl p-6">
-                                    <h2 class="text-lg font-bold text-gray-900 mb-4">Status Distribution</h2>
-                                    <div class="chart-container">
-                                        <canvas id="statusChart"></canvas>
-                                    </div>
-                                </div>
-
-                                <!-- Engineer Performance -->
-                                <div class="glass-card rounded-xl p-6">
-                                    <h2 class="text-lg font-bold text-gray-900 mb-4">👥 Engineer Performance</h2>
-                                    <div class="space-y-4">
-                                        ${engineers.slice(0, 5).map(eng => `
-                                            <div>
-                                                <div class="flex justify-between items-center mb-2">
-                                                    <span class="font-semibold text-gray-900">${eng.name}</span>
-                                                    <span class="text-sm text-gray-600">${eng.completed}/${eng.total}</span>
-                                                </div>
-                                                <div class="progress-bar">
-                                                    <div class="progress-fill" style="width: ${eng.rate}%"></div>
-                                                </div>
-                                                <div class="text-xs text-gray-500 mt-1">${eng.rate}% completion rate</div>
-                                            </div>
-                                        `).join('')}
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Data Table -->
-                            <div class="glass-card rounded-xl p-6">
-                                <h2 class="text-lg font-bold text-gray-900 mb-6">📋 Activity Log</h2>
-                                ${this.filteredData.length === 0 ? `
-                                    <div class="empty-state">
-                                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                                        </svg>
-                                        <h3 class="text-lg font-semibold text-gray-900 mb-1">No data found</h3>
-                                        <p class="text-sm text-gray-500">Try adjusting your filters</p>
-                                    </div>
-                                ` : `
-                                    <div class="table-container">
-                                        <table>
-                                            <thead>
-                                                <tr>
-                                                    <th>Task</th>
-                                                    <th>Sub-Task</th>
-                                                    <th>Engineer</th>
-                                                    <th>Status</th>
-                                                    <th>Start Date</th>
-                                                    <th>End Date</th>
-                                                    <th>Notes</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                ${this.filteredData.map(item => `
-                                                    <tr class="table-row">
-                                                        <td class="font-medium text-gray-900">${item.Task}</td>
-                                                        <td class="text-gray-700">${item['Sub-Task']}</td>
-                                                        <td class="font-medium text-gray-900">${item.Engineer}</td>
-                                                        <td>
-                                                            <span class="badge badge-${item.Status.toLowerCase().replace(/\s+/g, '-')}">${item.Status}</span>
-                                                        </td>
-                                                        <td class="text-sm">${item['Start Date']}</td>
-                                                        <td class="text-sm">${item['Closure Date'] || '–'}</td>
-                                                        <td class="text-sm max-w-xs">${item['Blocker/Dependency'] || '–'}</td>
-                                                    </tr>
-                                                `).join('')}
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                `}
-                            </div>
-                        </main>
-                    </div>
-                `;
-
-                this.attachEventListeners();
-                this.initCharts(statusDist);
+                this.renderFilters();
+                this.renderStats();
+                this.renderEngineerCards();
+                this.renderTable();
                 document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString();
             }
 
-            initCharts(statusDist) {
-                const statusCtx = document.getElementById('statusChart');
-                if (statusCtx && !this.chartsInitialized) {
-                    new Chart(statusCtx, {
-                        type: 'doughnut',
-                        data: {
-                            labels: ['Completed', 'In Progress', 'Blocked', 'Not Started'],
-                            datasets: [{
-                                data: [
-                                    statusDist['Completed'],
-                                    statusDist['In Progress'],
-                                    statusDist['Blocked'],
-                                    statusDist['Not Started']
-                                ],
-                                backgroundColor: [
-                                    '#10b981',
-                                    '#3b82f6',
-                                    '#ef4444',
-                                    '#6b7280'
-                                ],
-                                borderColor: 'rgba(255, 255, 255, 0.95)',
-                                borderWidth: 3,
-                                borderRadius: 8
-                            }]
-                        },
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            plugins: {
-                                legend: {
-                                    position: 'bottom',
-                                    labels: {
-                                        font: { size: 12, weight: '500' },
-                                        padding: 20,
-                                        usePointStyle: true
-                                    }
-                                }
-                            }
-                        }
-                    });
-                    this.chartsInitialized = true;
+            renderFilters() {
+                const engineerHTML = this.metadata.engineers.map(eng => `
+                    <button class="filter-chip ${this.filters.engineers.includes(eng) ? 'active' : ''}" onclick="dashboard.toggleEngineerFilter('${eng}')">
+                        ${eng}
+                    </button>
+                `).join('');
+                document.getElementById('engineerFilters').innerHTML = engineerHTML;
+
+                const statusHTML = this.metadata.statuses.map(status => `
+                    <button class="filter-chip ${this.filters.statuses.includes(status) ? 'active' : ''}" onclick="dashboard.toggleStatusFilter('${status}')">
+                        ${status}
+                    </button>
+                `).join('');
+                document.getElementById('statusFilters').innerHTML = statusHTML;
+
+                if (this.filters.dateRange.start && this.filters.dateRange.end) {
+                    document.getElementById('dateDisplay').textContent = `${this.filters.dateRange.start} to ${this.filters.dateRange.end}`;
                 }
             }
 
-            generateQuarterOptions() {
-                const year = new Date().getFullYear();
-                const options = [];
-                for (let y = year - 1; y <= year + 1; y++) {
-                    for (let q = 1; q <= 4; q++) {
-                        options.push(`<option value="${y}-Q${q}">Q${q} ${y}</option>`);
-                    }
-                }
-                return options.join('');
-            }
-
-            attachEventListeners() {
-                document.getElementById('refreshBtn')?.addEventListener('click', () => this.loadData());
-                document.getElementById('exportBtn')?.addEventListener('click', () => this.exportCSV());
-                
-                document.getElementById('quarterFilter')?.addEventListener('change', (e) => {
-                    this.filters.quarter = e.target.value;
-                    this.applyFilters();
-                    this.render();
-                });
-                
-                document.getElementById('startDate')?.addEventListener('change', (e) => {
-                    this.filters.dateRange.start = e.target.value;
-                    this.applyFilters();
-                    this.render();
-                });
-                
-                document.getElementById('endDate')?.addEventListener('change', (e) => {
-                    this.filters.dateRange.end = e.target.value;
-                    this.applyFilters();
-                    this.render();
-                });
-            }
-
-            showError(message) {
-                document.getElementById('root').innerHTML = `
-                    <div class="min-h-screen bg-gradient-to-br from-red-50 to-red-100 flex items-center justify-center p-6">
-                        <div class="glass-card rounded-xl p-8 max-w-md">
-                            <div class="text-center">
-                                <div class="text-6xl mb-4">⚠️</div>
-                                <h2 class="text-2xl font-bold text-red-600 mb-2">Configuration Error</h2>
-                                <p class="text-gray-600 mb-6">${message}</p>
-                                <button onclick="location.reload()" class="w-full px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:shadow-lg transition font-semibold">
-                                    Retry
-                                </button>
-                            </div>
-                        </div>
+            renderStats() {
+                const metrics = this.getMetrics();
+                const statsHTML = `
+                    <div class="stat-card">
+                        <div class="stat-number">${metrics.total}</div>
+                        <div class="stat-label">Total Tasks</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" style="color: #34c759;">${metrics.completed}</div>
+                        <div class="stat-label">Completed</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" style="color: #0071e3;">${metrics.inProgress}</div>
+                        <div class="stat-label">In Progress</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" style="color: #ff3b30;">${metrics.blocked}</div>
+                        <div class="stat-label">Blocked</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" style="color: #0071e3;">${metrics.completionRate}%</div>
+                        <div class="stat-label">Completion Rate</div>
                     </div>
                 `;
+                document.getElementById('statsGrid').innerHTML = statsHTML;
+            }
+
+            renderEngineerCards() {
+                const engineers = this.getEngineerStats();
+                const cardsHTML = engineers.map(eng => `
+                    <div class="card">
+                        <div class="card-title">${eng.name}</div>
+                        <div class="card-subtitle">${eng.completed} of ${eng.total} tasks completed</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${eng.rate}%"></div>
+                        </div>
+                        <div class="progress-label">
+                            <span>${eng.rate}% Complete</span>
+                            <span style="color: #0071e3; font-weight: 600;">${eng.completed}/${eng.total}</span>
+                        </div>
+                    </div>
+                `).join('');
+                document.getElementById('engineerCards').innerHTML = cardsHTML;
+            }
+
+            renderTable() {
+                if (this.filteredData.length === 0) {
+                    document.getElementById('tableContent').innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">📭</div>
+                            <div class="empty-state-title">No Tasks Found</div>
+                            <p>Try adjusting your filters</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                const tableHTML = `
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Task</th>
+                                <th>Sub-Task</th>
+                                <th>Engineer</th>
+                                <th>Status</th>
+                                <th>Start Date</th>
+                                <th>End Date</th>
+                                <th>Notes</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${this.filteredData.map(item => `
+                                <tr>
+                                    <td><strong>${item.Task}</strong></td>
+                                    <td>${item['Sub-Task']}</td>
+                                    <td>${item.Engineer}</td>
+                                    <td><span class="badge badge-${item.Status.toLowerCase().replace(/\s+/g, '-')}">${item.Status}</span></td>
+                                    <td>${item['Start Date']}</td>
+                                    <td>${item['Closure Date'] || '–'}</td>
+                                    <td>${item['Blocker/Dependency'] || '–'}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                `;
+                document.getElementById('tableContent').innerHTML = tableHTML;
             }
         }
 
         let dashboard;
         window.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('refreshBtn').addEventListener('click', () => dashboard.loadData());
+            document.getElementById('exportBtn').addEventListener('click', () => dashboard.exportCSV());
+            document.getElementById('startDate').addEventListener('change', (e) => {
+                dashboard.filters.dateRange.start = e.target.value;
+                dashboard.updateDateDisplay();
+                dashboard.applyFilters();
+                dashboard.render();
+            });
+            document.getElementById('endDate').addEventListener('change', (e) => {
+                dashboard.filters.dateRange.end = e.target.value;
+                dashboard.updateDateDisplay();
+                dashboard.applyFilters();
+                dashboard.render();
+            });
+            
             dashboard = new Dashboard();
         });
     </script>
