@@ -25,10 +25,10 @@
             },
             colors: {
               executive: {
-                950: '#050507', // Deepest background
-                900: '#0f0f13', // Card background
-                800: '#27272a', // Light Borders
-                700: '#3f3f46', // Hover states
+                950: '#050507', 
+                900: '#0f0f13', 
+                800: '#27272a',
+                700: '#3f3f46', 
                 gold: '#FFC300',
                 goldDim: '#B38F00',
               }
@@ -44,26 +44,25 @@
         color: #e4e4e7;
       }
       /* Custom Scrollbar */
-      ::-webkit-scrollbar {
-        width: 8px;
-        height: 8px;
-      }
-      ::-webkit-scrollbar-track {
-        background: #0f0f13; 
-      }
-      ::-webkit-scrollbar-thumb {
-        background: #27272a; 
-        border-radius: 4px;
-      }
-      ::-webkit-scrollbar-thumb:hover {
-        background: #3f3f46; 
-      }
+      ::-webkit-scrollbar { width: 8px; height: 8px; }
+      ::-webkit-scrollbar-track { background: #0f0f13; }
+      ::-webkit-scrollbar-thumb { background: #27272a; border-radius: 4px; }
+      ::-webkit-scrollbar-thumb:hover { background: #3f3f46; }
       
       .glass-panel {
         background: rgba(15, 15, 19, 0.7);
         backdrop-filter: blur(12px);
         -webkit-backdrop-filter: blur(12px);
         border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      }
+      
+      /* Glowing Pulse Animation for the new card */
+      @keyframes pulse-violet {
+        0%, 100% { box-shadow: 0 0 15px rgba(139, 92, 246, 0.1); border-color: rgba(139, 92, 246, 0.3); }
+        50% { box-shadow: 0 0 25px rgba(139, 92, 246, 0.25); border-color: rgba(139, 92, 246, 0.6); }
+      }
+      .glow-card {
+        animation: pulse-violet 3s infinite;
       }
     </style>
 </head>
@@ -73,7 +72,7 @@
         <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
             <div class="flex items-center gap-3">
                 <div class="w-2 h-8 bg-executive-gold rounded-full"></div>
-                <h1 class="text-xl font-bold tracking-tight text-white">COMMAND <span class="text-gray-500 font-light">CENTER</span></h1>
+                <h1 class="text-xl font-bold tracking-tight text-white">COMMAND <span class="text-zinc-500 font-light">CENTER</span></h1>
             </div>
             <div class="flex items-center gap-4">
                 <span id="lastUpdate" class="text-xs text-zinc-500 font-mono">Synced: --:--</span>
@@ -139,15 +138,12 @@
             </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-            
             <div class="bg-executive-900 border border-white/5 rounded-xl p-6 shadow-lg lg:col-span-1 flex flex-col">
                 <h3 class="text-lg font-bold text-white mb-6">Performance Distribution</h3>
                 <div class="relative h-64 w-full">
                     <canvas id="performanceChart"></canvas>
                 </div>
-                <div class="mt-4 text-xs text-zinc-500 text-center">
-                    Resolution rate by personnel
-                </div>
+                <div class="mt-4 text-xs text-zinc-500 text-center">Resolution rate by personnel</div>
             </div>
 
             <div class="lg:col-span-2">
@@ -161,15 +157,12 @@
                 <h3 id="tableTitle" class="text-xl font-bold text-white border-l-4 border-indigo-500 pl-4">Activity Log</h3>
                 <div class="text-sm text-zinc-500" id="recordCount"></div>
             </div>
-            
             <div class="bg-executive-900 border border-white/5 rounded-xl overflow-hidden shadow-2xl">
                 <div class="overflow-x-auto">
-                    <div id="tableContent">
-                        </div>
+                    <div id="tableContent"></div>
                 </div>
             </div>
         </div>
-
     </main>
 
     <footer class="border-t border-white/5 mt-auto py-8">
@@ -187,23 +180,23 @@
             ORG_NAME: 'Your Organization'
         };
 
-        // --- Demo Data ---
         const DEMO_DATA_TRACKER = [
             { 'Task': 'API Integration', 'Sub-Task': 'User Auth', 'Engineer': 'Alice Johnson', 'Status': 'Completed', 'Start Date': '2024-10-01', 'Closure Date': '2024-10-15', 'Blocker/Dependency': '' },
             { 'Task': 'API Integration', 'Sub-Task': 'Payment', 'Engineer': 'Bob Smith', 'Status': 'In Progress', 'Start Date': '2024-10-10', 'Closure Date': '', 'Blocker/Dependency': '' },
             { 'Task': 'Database Migration', 'Sub-Task': 'Schema', 'Engineer': 'Carol Davis', 'Status': 'Completed', 'Start Date': '2024-09-15', 'Closure Date': '2024-09-30', 'Blocker/Dependency': '' },
             { 'Task': 'Database Migration', 'Sub-Task': 'Data Transfer', 'Engineer': 'David Lee', 'Status': 'Blocked', 'Start Date': '2024-10-01', 'Closure Date': '', 'Blocker/Dependency': 'Waiting for approval' },
             { 'Task': 'Frontend Redesign', 'Sub-Task': 'Homepage', 'Engineer': 'Emma Wilson', 'Status': 'Completed', 'Start Date': '2024-11-01', 'Closure Date': '2024-11-10', 'Blocker/Dependency': '' },
-            { 'Task': 'Frontend Redesign', 'Sub-Task': 'Dashboard', 'Engineer': 'Frank Brown', 'Status': 'In Progress', 'Start Date': '2024-11-05', 'Closure Date': '', 'Blocker/Dependency': '' },
+            { 'Task': 'Frontend Redesign', 'Sub-Task': 'Dashboard', 'Engineer': 'Frank Brown', 'Status': 'In Progress', 'Start Date': '2024-11-05', 'Closure Date': '', 'Blocker/Dependency': '' }
         ];
         
+        // Added some resolved items with realistic dates for calculation testing
         const DEMO_DATA_FRESHSERVICE = [
-            { 'ID': 1001, 'Type': 'Incident', 'Status': 'Resolved', 'Priority': 'High', 'Subject': 'Network outage in building A', 'Agent Name': 'Alice Johnson', 'Created Date': '2024-11-20', 'Resolved Date': '2024-11-20', 'Closed Date': '2024-11-21' },
-            { 'ID': 1002, 'Type': 'Service Request', 'Status': 'Open', 'Priority': 'Low', 'Subject': 'Request new laptop for Jane', 'Agent Name': 'Carol Davis', 'Created Date': '2024-11-27', 'Resolved Date': '', 'Closed Date': '' },
-            { 'ID': 1003, 'Type': 'Incident', 'Status': 'Pending', 'Priority': 'Medium', 'Subject': 'Printer in HR broken', 'Agent Name': 'Bob Smith', 'Created Date': '2024-11-28', 'Resolved Date': '', 'Closed Date': '' },
-            { 'ID': 1004, 'Type': 'Service Request', 'Status': 'Closed', 'Priority': 'High', 'Subject': 'Software installation request', 'Agent Name': 'Alice Johnson', 'Created Date': '2024-11-15', 'Resolved Date': '2024-11-16', 'Closed Date': '2024-11-16' },
-            { 'ID': 1005, 'Type': 'Problem', 'Status': 'On Hold', 'Priority': 'Medium', 'Subject': 'Server license issue', 'Agent Name': 'David Lee', 'Created Date': '2024-10-10', 'Resolved Date': '', 'Closed Date': '' },
-            { 'ID': 1006, 'Type': 'Incident', 'Status': 'Open', 'Priority': 'High', 'Subject': 'Critical website error', 'Agent Name': 'David Lee', 'Created Date': '2024-11-28', 'Resolved Date': '', 'Closed Date': '' },
+            { 'ID': 1001, 'Type': 'Incident', 'Status': 'Resolved', 'Priority': 'High', 'Subject': 'Network outage', 'Agent Name': 'Alice Johnson', 'Created Date': '2024-11-20 10:00', 'Resolved Date': '2024-11-20 14:30', 'Closed Date': '2024-11-21' },
+            { 'ID': 1002, 'Type': 'Service Request', 'Status': 'Open', 'Priority': 'Low', 'Subject': 'Laptop Request', 'Agent Name': 'Carol Davis', 'Created Date': '2024-11-27 09:00', 'Resolved Date': '', 'Closed Date': '' },
+            { 'ID': 1003, 'Type': 'Incident', 'Status': 'Resolved', 'Priority': 'Medium', 'Subject': 'Printer Issue', 'Agent Name': 'Bob Smith', 'Created Date': '2024-11-25 17:00', 'Resolved Date': '2024-11-26 11:00', 'Closed Date': '' }, 
+            { 'ID': 1004, 'Type': 'Service Request', 'Status': 'Closed', 'Priority': 'High', 'Subject': 'Software Install', 'Agent Name': 'Alice Johnson', 'Created Date': '2024-11-15 11:00', 'Resolved Date': '2024-11-16 12:00', 'Closed Date': '2024-11-16' },
+            { 'ID': 1005, 'Type': 'Problem', 'Status': 'On Hold', 'Priority': 'Medium', 'Subject': 'Server License', 'Agent Name': 'David Lee', 'Created Date': '2024-10-10', 'Resolved Date': '', 'Closed Date': '' },
+            { 'ID': 1006, 'Type': 'Incident', 'Status': 'Open', 'Priority': 'High', 'Subject': 'Website Error', 'Agent Name': 'David Lee', 'Created Date': '2024-11-28', 'Resolved Date': '', 'Closed Date': '' },
         ];
 
         class Dashboard {
@@ -213,7 +206,7 @@
                 this.metadata = { engineers: [], statuses: [] };
                 this.filters = { engineers: [], statuses: [], dateRange: { start: '', end: '' } };
                 this.currentSource = 'tracker'; 
-                this.chartInstance = null; // Store chart instance to update/destroy
+                this.chartInstance = null;
                 this.init();
             }
 
@@ -223,34 +216,21 @@
                 setInterval(() => this.loadData(), CONFIG.REFRESH_INTERVAL);
             }
 
-            // Helper for field abstraction
             getFieldValue(item, fieldType) {
                 if (!item) return '';
-                if (fieldType === 'engineer') {
-                    return item['Engineer'] || item['engineer'] || item['Agent Name'] || item['agent_name'] || item['agent'] || item['Responder'] || item['responder_name'] || 'Unassigned';
-                }
-                if (fieldType === 'date') {
-                    return item['Start Date'] || item['start_date'] || item['Created Date'] || item['created_at'] || '';
-                }
+                if (fieldType === 'engineer') return item['Engineer'] || item['engineer'] || item['Agent Name'] || item['agent_name'] || item['agent'] || item['Responder'] || 'Unassigned';
+                if (fieldType === 'date') return item['Start Date'] || item['start_date'] || item['Created Date'] || item['created_at'] || '';
                 return '';
             }
 
             async switchDataSource(source, reload = true) {
                 this.currentSource = source;
-                
-                // Toggle Styles
                 const activeClass = "bg-executive-gold text-executive-950 font-bold shadow-lg";
                 const inactiveClass = "text-zinc-400 hover:text-white";
-
-                const trackerBtn = document.getElementById('trackerToggle');
-                const fsBtn = document.getElementById('freshserviceToggle');
-
-                trackerBtn.className = "px-6 py-2 rounded-md text-sm transition-all duration-300 " + (source === 'tracker' ? activeClass : inactiveClass);
-                fsBtn.className = "px-6 py-2 rounded-md text-sm transition-all duration-300 " + (source === 'freshservice' ? activeClass : inactiveClass);
-                
+                document.getElementById('trackerToggle').className = "px-6 py-2 rounded-md text-sm transition-all duration-300 " + (source === 'tracker' ? activeClass : inactiveClass);
+                document.getElementById('freshserviceToggle').className = "px-6 py-2 rounded-md text-sm transition-all duration-300 " + (source === 'freshservice' ? activeClass : inactiveClass);
                 document.getElementById('tableTitle').textContent = source === 'tracker' ? 'Engineering Tasks' : 'Helpdesk Tickets';
                 document.getElementById('engineerFilterLabel').textContent = source === 'tracker' ? 'ENGINEERS' : 'AGENTS';
-
                 if (reload) {
                     this.filters = { engineers: [], statuses: [], dateRange: { start: '', end: '' } };
                     document.getElementById('startDate').value = '';
@@ -262,7 +242,6 @@
             async loadData() {
                 const refreshIcon = document.getElementById('refreshIcon');
                 if(refreshIcon) refreshIcon.classList.add('animate-spin');
-
                 try {
                     if (CONFIG.ENABLE_DEMO) {
                         await new Promise(r => setTimeout(r, 600)); 
@@ -274,42 +253,26 @@
                         if (!result.success) throw new Error(result.message);
                         this.data = result.data;
                     }
-
-                    // Metadata derivation
-                    const distinctEngineers = [...new Set(this.data.map(item => this.getFieldValue(item, 'engineer')))]
-                        .filter(name => name && name !== 'Unassigned' && name.trim() !== '').sort();
+                    const distinctEngineers = [...new Set(this.data.map(item => this.getFieldValue(item, 'engineer')))].filter(n => n && n !== 'Unassigned').sort();
                     const distinctStatuses = [...new Set(this.data.map(item => item.Status))].filter(Boolean).sort();
-
                     this.metadata = { engineers: distinctEngineers, statuses: distinctStatuses };
-
                     this.applyFilters();
                     this.render();
                     document.getElementById('lastUpdate').textContent = 'Synced: ' + new Date().toLocaleTimeString();
-                } catch (error) {
-                    console.error('Error:', error);
-                    alert('Error loading data: ' + error.message);
-                } finally {
-                    if(refreshIcon) refreshIcon.classList.remove('animate-spin');
-                }
+                } catch (error) { console.error(error); alert('Error: ' + error.message); } 
+                finally { if(refreshIcon) refreshIcon.classList.remove('animate-spin'); }
             }
 
             applyFilters() {
                 let filtered = [...this.data];
-
-                if (this.filters.engineers.length > 0) {
-                    filtered = filtered.filter(item => this.filters.engineers.includes(this.getFieldValue(item, 'engineer')));
-                }
-                if (this.filters.statuses.length > 0) {
-                    filtered = filtered.filter(item => this.filters.statuses.includes(item.Status));
-                }
+                if (this.filters.engineers.length > 0) filtered = filtered.filter(item => this.filters.engineers.includes(this.getFieldValue(item, 'engineer')));
+                if (this.filters.statuses.length > 0) filtered = filtered.filter(item => this.filters.statuses.includes(item.Status));
                 if (this.filters.dateRange.start && this.filters.dateRange.end) {
                     const start = new Date(this.filters.dateRange.start);
                     const end = new Date(this.filters.dateRange.end);
                     filtered = filtered.filter(item => {
                         const dateStr = this.getFieldValue(item, 'date');
-                        if (!dateStr) return false;
-                        const date = new Date(dateStr);
-                        return date >= start && date <= end; 
+                        return dateStr && new Date(dateStr) >= start && new Date(dateStr) <= end; 
                     });
                 }
                 this.filteredData = filtered;
@@ -317,49 +280,98 @@
 
             toggleEngineerFilter(engineer) {
                 const idx = this.filters.engineers.indexOf(engineer);
-                if (idx > -1) this.filters.engineers.splice(idx, 1);
-                else this.filters.engineers.push(engineer);
-                this.applyFilters();
-                this.render();
+                if (idx > -1) this.filters.engineers.splice(idx, 1); else this.filters.engineers.push(engineer);
+                this.applyFilters(); this.render();
             }
-
             toggleStatusFilter(status) {
                 const idx = this.filters.statuses.indexOf(status);
-                if (idx > -1) this.filters.statuses.splice(idx, 1);
-                else this.filters.statuses.push(status);
-                this.applyFilters();
-                this.render();
+                if (idx > -1) this.filters.statuses.splice(idx, 1); else this.filters.statuses.push(status);
+                this.applyFilters(); this.render();
             }
-
             clearAllFilters() {
                 this.filters = { engineers: [], statuses: [], dateRange: { start: '', end: '' } };
-                document.getElementById('startDate').value = '';
-                document.getElementById('endDate').value = '';
-                this.applyFilters();
-                this.render();
+                document.getElementById('startDate').value = ''; document.getElementById('endDate').value = '';
+                this.applyFilters(); this.render();
             }
 
             getMetrics() {
                 const completedStatuses = this.currentSource === 'freshservice' ? ['Resolved', 'Closed'] : ['Completed'];
                 const inProgressStatuses = this.currentSource === 'freshservice' ? ['Open', 'Pending', 'On Hold'] : ['In Progress', 'Not Started'];
-                const highPriorityOpenStatuses = this.currentSource === 'freshservice' 
-                    ? this.filteredData.filter(d => d.Status === 'Open' && d.Priority === 'High') : [];
-                
+                const highPriorityOpenStatuses = this.currentSource === 'freshservice' ? this.filteredData.filter(d => d.Status === 'Open' && d.Priority === 'High') : [];
                 const completed = this.filteredData.filter(d => completedStatuses.includes(d.Status)).length;
                 const inProgress = this.filteredData.filter(d => inProgressStatuses.includes(d.Status)).length;
-                const blocked = this.currentSource === 'tracker' 
-                    ? this.filteredData.filter(d => d.Status === 'Blocked').length
-                    : highPriorityOpenStatuses.length;
-
-                const total = this.filteredData.length;
-
-                return { total, completed, inProgress, blocked };
+                const blocked = this.currentSource === 'tracker' ? this.filteredData.filter(d => d.Status === 'Blocked').length : highPriorityOpenStatuses.length;
+                return { total: this.filteredData.length, completed, inProgress, blocked };
             }
+
+            // --- BUSINESS LOGIC FOR TIME CALCULATION ---
+            getWorkingMinutes(startDate, endDate) {
+                let minutes = 0;
+                let current = new Date(startDate);
+                const end = new Date(endDate);
+
+                // Start/End Hours IST (10 AM to 6 PM)
+                const START_HOUR = 10;
+                const END_HOUR = 18;
+
+                while (current < end) {
+                    const day = current.getDay();
+                    // 0 = Sunday, 6 = Saturday. Skip weekends.
+                    if (day !== 0 && day !== 6) {
+                        const currentHour = current.getHours();
+                        // Only count if within 10 AM - 6 PM
+                        if (currentHour >= START_HOUR && currentHour < END_HOUR) {
+                            minutes++;
+                        }
+                    }
+                    current.setMinutes(current.getMinutes() + 1);
+                }
+                return minutes;
+            }
+
+            getResolutionMetrics() {
+                let totalMinutes = 0;
+                let count = 0;
+                let earliestDate = null;
+                let latestDate = null;
+
+                this.filteredData.forEach(item => {
+                    // Check if ticket is resolved/closed and has both dates
+                    if (['Resolved', 'Closed'].includes(item.Status) && item['Created Date'] && item['Resolved Date']) {
+                        const start = new Date(item['Created Date']);
+                        const end = new Date(item['Resolved Date']);
+                        
+                        if (!isNaN(start) && !isNaN(end) && end > start) {
+                            // Track Period Range
+                            if (!earliestDate || start < earliestDate) earliestDate = start;
+                            if (!latestDate || start > latestDate) latestDate = start;
+
+                            // Calculate Duration
+                            totalMinutes += this.getWorkingMinutes(start, end);
+                            count++;
+                        }
+                    }
+                });
+
+                const avgMinutes = count > 0 ? Math.floor(totalMinutes / count) : 0;
+                const hours = Math.floor(avgMinutes / 60);
+                const mins = avgMinutes % 60;
+                
+                // Format Period String
+                const formatDate = (d) => d ? d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : '-';
+                const periodString = earliestDate && latestDate ? `${formatDate(earliestDate)} - ${formatDate(latestDate)}` : 'No Data';
+
+                return {
+                    avgTime: count > 0 ? `${hours}h ${mins}m` : 'N/A',
+                    period: periodString,
+                    ticketCount: count
+                };
+            }
+            // -------------------------------------------
 
             getEngineerStats() {
                 const stats = {};
                 const completedStatuses = this.currentSource === 'freshservice' ? ['Resolved', 'Closed'] : ['Completed'];
-                
                 this.filteredData.forEach(item => {
                     const name = this.getFieldValue(item, 'engineer');
                     if (!name || name === 'Unassigned') return;
@@ -367,26 +379,17 @@
                     stats[name].total++;
                     if (completedStatuses.includes(item.Status)) stats[name].completed++;
                 });
-
-                return Object.entries(stats)
-                    .map(([name, data]) => ({
-                        name,
-                        ...data,
-                        rate: data.total > 0 ? Math.round((data.completed / data.total) * 100) : 0
-                    }))
-                    .sort((a, b) => b.rate - a.rate);
+                return Object.entries(stats).map(([name, data]) => ({
+                    name, ...data, rate: data.total > 0 ? Math.round((data.completed / data.total) * 100) : 0
+                })).sort((a, b) => b.rate - a.rate);
             }
 
             render() {
                 this.renderFilters();
                 this.renderStats();
-                this.renderEngineerSection(); // Renders Chart + Cards
+                this.renderEngineerSection();
                 this.renderTable();
-                
-                if (window.lucide) {
-                    window.lucide.createIcons();
-                }
-                
+                if (window.lucide) window.lucide.createIcons();
                 document.getElementById('recordCount').innerText = `${this.filteredData.length} records found`;
             }
 
@@ -394,286 +397,136 @@
                 const engContainer = document.getElementById('engineerFilters');
                 const statContainer = document.getElementById('statusFilters');
                 if(!engContainer || !statContainer) return;
-
                 const engineerList = this.metadata.engineers || [];
-                
-                if (engineerList.length === 0) {
-                    engContainer.innerHTML = '<span class="text-zinc-600 text-xs italic">No agents found</span>';
-                } else {
-                    const engineerHTML = engineerList.map(eng => {
-                        const isActive = this.filters.engineers.includes(eng);
-                        return `
-                            <button class="px-3 py-1 text-xs font-medium rounded-full border transition-all duration-200 ${isActive ? 'bg-executive-gold text-executive-950 border-executive-gold' : 'bg-executive-900 text-zinc-400 border-white/5 hover:border-white/20 hover:text-white'}" onclick="dashboard.toggleEngineerFilter('${eng}')">
-                                ${eng}
-                            </button>
-                        `;
-                    }).join('');
-                    engContainer.innerHTML = engineerHTML;
-                }
-
-                const statusHTML = (this.metadata.statuses || []).map(status => {
-                    const isActive = this.filters.statuses.includes(status);
-                    return `
-                        <button class="px-3 py-1 text-xs font-medium rounded-full border transition-all duration-200 ${isActive ? 'bg-indigo-500 text-white border-indigo-500' : 'bg-executive-900 text-zinc-400 border-white/5 hover:border-white/20 hover:text-white'}" onclick="dashboard.toggleStatusFilter('${status}')">
-                            ${status}
-                        </button>
-                    `;
-                }).join('');
-                statContainer.innerHTML = statusHTML;
+                engContainer.innerHTML = engineerList.length === 0 ? '<span class="text-zinc-600 text-xs italic">No agents found</span>' : 
+                    engineerList.map(eng => `<button class="px-3 py-1 text-xs font-medium rounded-full border transition-all duration-200 ${this.filters.engineers.includes(eng) ? 'bg-executive-gold text-executive-950 border-executive-gold' : 'bg-executive-900 text-zinc-400 border-white/5 hover:border-white/20 hover:text-white'}" onclick="dashboard.toggleEngineerFilter('${eng}')">${eng}</button>`).join('');
+                statContainer.innerHTML = (this.metadata.statuses || []).map(status => `<button class="px-3 py-1 text-xs font-medium rounded-full border transition-all duration-200 ${this.filters.statuses.includes(status) ? 'bg-indigo-500 text-white border-indigo-500' : 'bg-executive-900 text-zinc-400 border-white/5 hover:border-white/20 hover:text-white'}" onclick="dashboard.toggleStatusFilter('${status}')">${status}</button>`).join('');
             }
 
-            // Styled matching the React StatCard
             renderStats() {
                 const metrics = this.getMetrics();
-                const completedLabel = this.currentSource === 'tracker' ? 'Completed' : 'Resolved';
-                const inProgressLabel = this.currentSource === 'tracker' ? 'In Progress' : 'Open/Pending';
-                const blockedLabel = this.currentSource === 'tracker' ? 'Blocked' : 'High Priority Open';
-
-                // Helpers for color mapping
                 const createCard = (label, value, iconName, colorText, bgSub) => `
                     <div class="bg-executive-900 border border-white/5 rounded-xl p-6 shadow-lg hover:border-white/10 transition-all duration-300 group">
                         <div class="flex justify-between items-start">
-                            <div>
-                                <p class="text-zinc-500 text-xs font-semibold uppercase tracking-wider mb-1">${label}</p>
-                                <h3 class="text-3xl font-bold ${colorText}">${value}</h3>
-                            </div>
-                            <div class="p-3 rounded-lg bg-white/5 ${bgSub} group-hover:bg-white/10 transition-colors">
-                                <i data-lucide="${iconName}" class="w-6 h-6"></i>
-                            </div>
+                            <div><p class="text-zinc-500 text-xs font-semibold uppercase tracking-wider mb-1">${label}</p><h3 class="text-3xl font-bold ${colorText}">${value}</h3></div>
+                            <div class="p-3 rounded-lg bg-white/5 ${bgSub} group-hover:bg-white/10 transition-colors"><i data-lucide="${iconName}" class="w-6 h-6"></i></div>
                         </div>
-                    </div>
+                    </div>`;
+
+                let html = `
+                    ${createCard('Total Items', metrics.total, 'trending-up', 'text-white', 'text-zinc-400')}
+                    ${createCard(this.currentSource === 'tracker' ? 'Completed' : 'Resolved', metrics.completed, 'check-circle', 'text-emerald-400', 'text-emerald-400/80')}
+                    ${createCard(this.currentSource === 'tracker' ? 'In Progress' : 'Open/Pending', metrics.inProgress, 'clock', 'text-indigo-400', 'text-indigo-400/80')}
                 `;
 
-                const html = `
-                    ${createCard('Total Items', metrics.total, 'trending-up', 'text-white', 'text-zinc-400')}
-                    ${createCard(completedLabel, metrics.completed, 'check-circle', 'text-emerald-400', 'text-emerald-400/80')}
-                    ${createCard(inProgressLabel, metrics.inProgress, 'clock', 'text-indigo-400', 'text-indigo-400/80')}
-                    ${createCard(blockedLabel, metrics.blocked, 'alert-circle', 'text-red-400', 'text-red-400/80')}
-                `;
+                // CONDITIONAL RENDERING FOR 4th CARD
+                if (this.currentSource === 'freshservice') {
+                    // Calculate Resolution Time
+                    const resMetrics = this.getResolutionMetrics();
+                    html += `
+                        <div class="bg-executive-900 border border-violet-500/30 rounded-xl p-6 shadow-lg glow-card group relative overflow-hidden">
+                            <div class="absolute top-0 right-0 p-8 opacity-20"><div class="w-20 h-20 rounded-full bg-violet-600 blur-2xl"></div></div>
+                            <div class="flex justify-between items-start relative z-10">
+                                <div>
+                                    <p class="text-violet-300 text-xs font-semibold uppercase tracking-wider mb-1">Avg Resolution Time</p>
+                                    <h3 class="text-3xl font-bold text-violet-400">${resMetrics.avgTime}</h3>
+                                    <div class="mt-2 inline-flex items-center gap-1 px-2 py-0.5 rounded bg-violet-500/10 border border-violet-500/20 text-[10px] text-violet-300">
+                                        <i data-lucide="calendar" class="w-3 h-3"></i> ${resMetrics.period}
+                                    </div>
+                                </div>
+                                <div class="p-3 rounded-lg bg-violet-500/20 text-violet-300 group-hover:bg-violet-500/30 transition-colors">
+                                    <i data-lucide="zap" class="w-6 h-6"></i>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    html += createCard('Blocked', metrics.blocked, 'alert-circle', 'text-red-400', 'text-red-400/80');
+                }
+
                 document.getElementById('statsGrid').innerHTML = html;
             }
 
             renderEngineerSection() {
                 const engineers = this.getEngineerStats();
-                const cardSubtitleText = this.currentSource === 'tracker' ? 'Items' : 'Items';
-
-                // 1. Render Cards (Right Side)
-                const cardsHTML = engineers.map(eng => `
-                    <div class="bg-executive-900 border border-white/5 rounded-xl p-5 hover:border-executive-gold/30 transition-all duration-200 group relative overflow-hidden">
-                        <div class="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-executive-gold to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                        
-                        <div class="flex justify-between items-start mb-4">
-                            <div>
-                                <h4 class="font-bold text-gray-200 text-lg">${eng.name}</h4>
-                                <p class="text-zinc-500 text-sm">${eng.completed} / ${eng.total} ${cardSubtitleText}</p>
-                            </div>
-                            <div class="text-2xl font-black text-executive-gold">${eng.rate}%</div>
-                        </div>
-                        
-                        <div class="w-full bg-zinc-800 rounded-full h-2 overflow-hidden">
-                            <div 
-                                class="h-full bg-gradient-to-r from-indigo-500 to-executive-gold transition-all duration-500" 
-                                style="width: ${eng.rate}%"
-                            ></div>
-                        </div>
-                    </div>
-                `).join('');
-
                 const container = document.getElementById('engineerCards');
                 if (container) {
-                    container.innerHTML = cardsHTML || '<div class="col-span-2 text-center text-zinc-500 py-10 italic">No performance data available.</div>';
+                    container.innerHTML = engineers.map(eng => `
+                        <div class="bg-executive-900 border border-white/5 rounded-xl p-5 hover:border-executive-gold/30 transition-all duration-200 group relative overflow-hidden">
+                            <div class="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-executive-gold to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                            <div class="flex justify-between items-start mb-4">
+                                <div><h4 class="font-bold text-gray-200 text-lg">${eng.name}</h4><p class="text-zinc-500 text-sm">${eng.completed} / ${eng.total} Items</p></div>
+                                <div class="text-2xl font-black text-executive-gold">${eng.rate}%</div>
+                            </div>
+                            <div class="w-full bg-zinc-800 rounded-full h-2 overflow-hidden"><div class="h-full bg-gradient-to-r from-indigo-500 to-executive-gold transition-all duration-500" style="width: ${eng.rate}%"></div></div>
+                        </div>`).join('') || '<div class="col-span-2 text-center text-zinc-500 py-10 italic">No performance data available.</div>';
                 }
-
-                // 2. Render Chart (Left Side)
                 this.updateChart(engineers);
             }
 
             updateChart(engineers) {
                 const canvas = document.getElementById('performanceChart');
                 if (!canvas) return;
-
-                const topEngineers = engineers.slice(0, 10); // Limit to top 10 for cleanliness
-                const labels = topEngineers.map(e => e.name);
-                const dataRates = topEngineers.map(e => e.rate);
-                
-                // Color logic based on rate
-                const colors = dataRates.map(rate => 
-                    rate >= 80 ? '#10b981' : // Emerald
-                    rate >= 50 ? '#6366f1' : // Indigo
-                    '#f59e0b' // Amber
-                );
-
-                if (this.chartInstance) {
-                    this.chartInstance.destroy();
-                }
-
+                const topEng = engineers.slice(0, 10);
+                const colors = topEng.map(e => e.rate >= 80 ? '#10b981' : e.rate >= 50 ? '#6366f1' : '#f59e0b');
+                if (this.chartInstance) this.chartInstance.destroy();
                 this.chartInstance = new Chart(canvas, {
                     type: 'bar',
-                    data: {
-                        labels: labels,
-                        datasets: [{
-                            label: 'Completion Rate %',
-                            data: dataRates,
-                            backgroundColor: colors,
-                            borderRadius: 4,
-                            barThickness: 12,
-                        }]
-                    },
-                    options: {
-                        indexAxis: 'y', // Horizontal bars like the Recharts example
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: { display: false },
-                            tooltip: {
-                                backgroundColor: '#18181b',
-                                titleColor: '#fff',
-                                bodyColor: '#fff',
-                                borderColor: '#27272a',
-                                borderWidth: 1,
-                                padding: 10,
-                                displayColors: false,
-                                callbacks: {
-                                    label: function(context) {
-                                        return context.raw + '%';
-                                    }
-                                }
-                            }
-                        },
-                        scales: {
-                            x: {
-                                display: false,
-                                max: 100
-                            },
-                            y: {
-                                ticks: {
-                                    color: '#a1a1aa', // zinc-400
-                                    font: { size: 11 }
-                                },
-                                grid: { display: false }
-                            }
-                        }
-                    }
+                    data: { labels: topEng.map(e => e.name), datasets: [{ label: 'Rate %', data: topEng.map(e => e.rate), backgroundColor: colors, borderRadius: 4, barThickness: 12 }] },
+                    options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { backgroundColor: '#18181b', bodyColor: '#fff' } }, scales: { x: { display: false, max: 100 }, y: { ticks: { color: '#a1a1aa' }, grid: { display: false } } } }
                 });
             }
 
             exportCSV() {
                  let headers, rows;
-                const source = this.currentSource;
-                if (source === 'freshservice') {
+                if (this.currentSource === 'freshservice') {
                     headers = ['ID', 'Type', 'Status', 'Priority', 'Subject', 'Agent Name', 'Created Date', 'Resolved Date'];
                     rows = this.filteredData.map(item => [item.ID, item.Type, item.Status, item.Priority, item.Subject, this.getFieldValue(item, 'engineer'), item['Created Date'], item['Resolved Date']]);
                 } else { 
                     headers = ['Task', 'Sub-Task', 'Engineer', 'Status', 'Start Date', 'Closure Date', 'Blocker'];
-                    rows = this.filteredData.map(item => [
-                        item.Task, item['Sub-Task'], this.getFieldValue(item, 'engineer'), item.Status, item['Start Date'], item['Closure Date'], item['Blocker/Dependency']
-                    ]);
+                    rows = this.filteredData.map(item => [item.Task, item['Sub-Task'], this.getFieldValue(item, 'engineer'), item.Status, item['Start Date'], item['Closure Date'], item['Blocker/Dependency']]);
                 }
                 const csv = [headers, ...rows].map(row => (row || []).map(cell => `"${cell || ''}"`).join(',')).join('\n');
                 const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
                 const link = document.createElement('a');
                 link.href = URL.createObjectURL(blob);
-                link.download = `report_${new Date().toISOString().slice(0,10)}.csv`;
+                link.download = `report.csv`;
                 link.click();
             }
 
             renderTable() {
                 if (this.filteredData.length === 0) {
-                    document.getElementById('tableContent').innerHTML = `
-                        <div class="p-12 text-center">
-                            <div class="text-4xl mb-4 text-zinc-600">📭</div>
-                            <h3 class="text-white font-medium mb-1">No Records Found</h3>
-                            <p class="text-zinc-500 text-sm">Adjust filters or switch data sources.</p>
-                        </div>
-                    `;
+                    document.getElementById('tableContent').innerHTML = `<div class="p-12 text-center"><div class="text-4xl mb-4 text-zinc-600">📭</div><h3 class="text-white font-medium mb-1">No Records Found</h3></div>`;
                     return;
                 }
-
-                const getStatusBadge = (status) => {
-                    const s = status.toLowerCase();
-                    let color = 'bg-zinc-800 text-zinc-300 border-zinc-700';
-                    if (['completed', 'resolved', 'closed'].some(x => s.includes(x))) color = 'bg-emerald-900/30 text-emerald-400 border-emerald-900';
-                    else if (['in progress', 'open', 'pending'].some(x => s.includes(x))) color = 'bg-indigo-900/30 text-indigo-400 border-indigo-900';
-                    else if (['blocked', 'high'].some(x => s.includes(x))) color = 'bg-red-900/30 text-red-400 border-red-900';
-                    else if (['on hold'].some(x => s.includes(x))) color = 'bg-amber-900/30 text-amber-400 border-amber-900';
-                    
-                    return `<span class="px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider border ${color}">${status}</span>`;
+                const getBadge = (s) => {
+                    s = s.toLowerCase();
+                    let c = 'bg-zinc-800 text-zinc-300';
+                    if (s.match(/completed|resolved|closed/)) c = 'bg-emerald-900/30 text-emerald-400';
+                    else if (s.match(/open|progress|pending/)) c = 'bg-indigo-900/30 text-indigo-400';
+                    else if (s.match(/blocked|high/)) c = 'bg-red-900/30 text-red-400';
+                    return `<span class="px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider border border-transparent ${c}">${s}</span>`;
                 };
-
-                let tableHeader, tableRows;
-                
+                let th, tr;
                 if (this.currentSource === 'freshservice') {
-                    tableHeader = `
-                        <th class="px-6 py-4 text-xs font-semibold text-zinc-500 uppercase tracking-wider">Reference</th>
-                        <th class="px-6 py-4 text-xs font-semibold text-zinc-500 uppercase tracking-wider">Agent</th>
-                        <th class="px-6 py-4 text-xs font-semibold text-zinc-500 uppercase tracking-wider">Status</th>
-                        <th class="px-6 py-4 text-xs font-semibold text-zinc-500 uppercase tracking-wider">Created</th>
-                    `;
-                    tableRows = this.filteredData.map(item => `
-                        <tr class="border-b border-white/5 hover:bg-white/5 transition-colors">
-                            <td class="px-6 py-4">
-                                <div class="text-sm font-bold text-white">#${item.ID || '?'}</div>
-                                <div class="text-xs text-zinc-500 truncate max-w-xs">${item.Subject || 'No Subject'}</div>
-                            </td>
-                            <td class="px-6 py-4 text-sm text-zinc-300">${this.getFieldValue(item, 'engineer')}</td>
-                            <td class="px-6 py-4">${getStatusBadge(item.Status)}</td>
-                            <td class="px-6 py-4 text-xs text-zinc-500 font-mono">${item['Created Date'] || '-'}</td>
-                        </tr>
-                    `).join('');
+                    th = `<th>ID / Subject</th><th>Agent</th><th>Status</th><th>Created</th>`;
+                    tr = this.filteredData.map(i => `<tr class="border-b border-white/5 hover:bg-white/5"><td class="px-6 py-4"><div class="text-sm font-bold text-white">#${i.ID||'?'}</div><div class="text-xs text-zinc-500">${i.Subject||'-'}</div></td><td class="px-6 py-4 text-sm text-zinc-300">${this.getFieldValue(i,'engineer')}</td><td class="px-6 py-4">${getBadge(i.Status)}</td><td class="px-6 py-4 text-xs text-zinc-500 font-mono">${i['Created Date']||'-'}</td></tr>`).join('');
                 } else {
-                    tableHeader = `
-                        <th class="px-6 py-4 text-xs font-semibold text-zinc-500 uppercase tracking-wider">Task</th>
-                        <th class="px-6 py-4 text-xs font-semibold text-zinc-500 uppercase tracking-wider">Engineer</th>
-                        <th class="px-6 py-4 text-xs font-semibold text-zinc-500 uppercase tracking-wider">Status</th>
-                        <th class="px-6 py-4 text-xs font-semibold text-zinc-500 uppercase tracking-wider">Timeline</th>
-                    `;
-                    tableRows = this.filteredData.map(item => `
-                        <tr class="border-b border-white/5 hover:bg-white/5 transition-colors">
-                            <td class="px-6 py-4">
-                                <div class="text-sm font-bold text-white">${item.Task}</div>
-                                <div class="text-xs text-zinc-500">${item['Sub-Task'] || ''}</div>
-                                ${item['Blocker/Dependency'] ? `<div class="mt-1 text-[10px] text-red-400">⚠️ ${item['Blocker/Dependency']}</div>` : ''}
-                            </td>
-                            <td class="px-6 py-4 text-sm text-zinc-300">${this.getFieldValue(item, 'engineer')}</td>
-                            <td class="px-6 py-4">${getStatusBadge(item.Status)}</td>
-                            <td class="px-6 py-4 text-xs text-zinc-500 font-mono">
-                                <div>Start: ${item['Start Date']}</div>
-                                ${item['Closure Date'] ? `<div>End: ${item['Closure Date']}</div>` : ''}
-                            </td>
-                        </tr>
-                    `).join('');
+                    th = `<th>Task</th><th>Engineer</th><th>Status</th><th>Timeline</th>`;
+                    tr = this.filteredData.map(i => `<tr class="border-b border-white/5 hover:bg-white/5"><td class="px-6 py-4"><div class="text-sm font-bold text-white">${i.Task}</div><div class="text-xs text-zinc-500">${i['Sub-Task']||''}</div></td><td class="px-6 py-4 text-sm text-zinc-300">${this.getFieldValue(i,'engineer')}</td><td class="px-6 py-4">${getBadge(i.Status)}</td><td class="px-6 py-4 text-xs text-zinc-500 font-mono">${i['Start Date']}</td></tr>`).join('');
                 }
-
-                document.getElementById('tableContent').innerHTML = `
-                    <table class="w-full text-left border-collapse">
-                        <thead class="bg-executive-950 border-b border-white/10">
-                            <tr>${tableHeader}</tr>
-                        </thead>
-                        <tbody class="divide-y divide-white/5">
-                            ${tableRows}
-                        </tbody>
-                    </table>
-                `;
+                document.getElementById('tableContent').innerHTML = `<table class="w-full text-left"><thead class="bg-executive-950 border-b border-white/10"><tr>${th.replace(/th>/g,'th class="px-6 py-4 text-xs font-semibold text-zinc-500 uppercase">')}</tr></thead><tbody class="divide-y divide-white/5">${tr}</tbody></table>`;
             }
         }
 
         let dashboard;
         window.addEventListener('DOMContentLoaded', () => {
             dashboard = new Dashboard();
-            
-            // Event Listeners for Filters
             document.getElementById('refreshBtn').addEventListener('click', () => dashboard.loadData());
             document.getElementById('exportBtn').addEventListener('click', () => dashboard.exportCSV());
-            
-            const handleDateChange = () => {
-                dashboard.filters.dateRange.start = document.getElementById('startDate').value;
-                dashboard.filters.dateRange.end = document.getElementById('endDate').value;
-                dashboard.applyFilters();
-                dashboard.render();
-            };
-            
-            document.getElementById('startDate').addEventListener('change', handleDateChange);
-            document.getElementById('endDate').addEventListener('change', handleDateChange);
+            const dateHandler = () => { dashboard.filters.dateRange.start = document.getElementById('startDate').value; dashboard.filters.dateRange.end = document.getElementById('endDate').value; dashboard.applyFilters(); dashboard.render(); };
+            document.getElementById('startDate').addEventListener('change', dateHandler);
+            document.getElementById('endDate').addEventListener('change', dateHandler);
         });
     </script>
 </body>
