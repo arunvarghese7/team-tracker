@@ -189,7 +189,6 @@
             { 'Task': 'Frontend Redesign', 'Sub-Task': 'Dashboard', 'Engineer': 'Frank Brown', 'Status': 'In Progress', 'Start Date': '2024-11-05', 'Closure Date': '', 'Blocker/Dependency': '' }
         ];
         
-        // Added some resolved items with realistic dates for calculation testing
         const DEMO_DATA_FRESHSERVICE = [
             { 'ID': 1001, 'Type': 'Incident', 'Status': 'Resolved', 'Priority': 'High', 'Subject': 'Network outage', 'Agent Name': 'Alice Johnson', 'Created Date': '2024-11-20 10:00', 'Resolved Date': '2024-11-20 14:30', 'Closed Date': '2024-11-21' },
             { 'ID': 1002, 'Type': 'Service Request', 'Status': 'Open', 'Priority': 'Low', 'Subject': 'Laptop Request', 'Agent Name': 'Carol Davis', 'Created Date': '2024-11-27 09:00', 'Resolved Date': '', 'Closed Date': '' },
@@ -332,37 +331,47 @@
             getResolutionMetrics() {
                 let totalMinutes = 0;
                 let count = 0;
-                let earliestDate = null;
-                let latestDate = null;
+                
+                // Variables for Period Calculation (Separate from Resolution Calculation)
+                let minCreated = null;
+                let maxCreated = null;
 
                 this.filteredData.forEach(item => {
-                    // Check if ticket is resolved/closed and has both dates
+                    // 1. Calculate Period based on Created Date (for ALL items in filter)
+                    const createdStr = item['Created Date'];
+                    if (createdStr) {
+                        const createdDate = new Date(createdStr);
+                        if (!isNaN(createdDate)) {
+                            if (!minCreated || createdDate < minCreated) minCreated = createdDate;
+                            if (!maxCreated || createdDate > maxCreated) maxCreated = createdDate;
+                        }
+                    }
+
+                    // 2. Calculate Resolution Time (Only for Resolved/Closed)
                     if (['Resolved', 'Closed'].includes(item.Status) && item['Created Date'] && item['Resolved Date']) {
                         const start = new Date(item['Created Date']);
                         const end = new Date(item['Resolved Date']);
                         
                         if (!isNaN(start) && !isNaN(end) && end > start) {
-                            // Track Period Range
-                            if (!earliestDate || start < earliestDate) earliestDate = start;
-                            if (!latestDate || start > latestDate) latestDate = start;
-
-                            // Calculate Duration
                             totalMinutes += this.getWorkingMinutes(start, end);
                             count++;
                         }
                     }
                 });
 
+                // Formatting Time
                 const avgMinutes = count > 0 ? Math.floor(totalMinutes / count) : 0;
                 const hours = Math.floor(avgMinutes / 60);
                 const mins = avgMinutes % 60;
                 
-                // Format Period String
+                // Formatting Date Period
                 const formatDate = (d) => d ? d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : '-';
-                const periodString = earliestDate && latestDate ? `${formatDate(earliestDate)} - ${formatDate(latestDate)}` : 'No Data';
+                
+                // Period based on ALL filtered data (Created Date), not just resolved ones
+                const periodString = minCreated && maxCreated ? `${formatDate(minCreated)} - ${formatDate(maxCreated)}` : 'No Data';
 
                 return {
-                    avgTime: count > 0 ? `${hours}h ${mins}m` : 'N/A',
+                    avgTime: count > 0 ? `${hours}h ${mins}m` : 'N/A', 
                     period: periodString,
                     ticketCount: count
                 };
