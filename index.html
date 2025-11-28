@@ -3,299 +3,182 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Executive Team Dashboard</title>
+    <title>Executive Command | Team Tracker</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Inter', 'sans-serif'],
+            },
+            colors: {
+              executive: {
+                950: '#050507', // Deepest background
+                900: '#0f0f13', // Card background
+                800: '#27272a', // Light Borders
+                700: '#3f3f46', // Hover states
+                gold: '#FFC300',
+                goldDim: '#B38F00',
+                blue: '#3b82f6',
+                green: '#10b981',
+                red: '#ef4444',
+              }
+            }
+          }
+        }
+      }
+    </script>
+
     <style>
-        /* EXECUTIVE CLASSY DARK MODE */
+      body {
+        background-color: #050507;
+        color: #e4e4e7;
+      }
+      /* Custom Scrollbar */
+      ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+      }
+      ::-webkit-scrollbar-track {
+        background: #0f0f13; 
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #27272a; 
+        border-radius: 4px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: #3f3f46; 
+      }
+      
+      .glass-panel {
+        background: rgba(15, 15, 19, 0.7);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      }
 
-        :root {
-            --primary-color: #5e72e4;   /* Deep Action Blue */
-            --accent-gold: #FFC300;     /* Elegant Amber/Gold Accent */
-            --accent-green: #00BFA5;    /* Sophisticated Teal Green for Success */
-            --dark-background: #0B0B0F; /* Rich Charcoal Black */
-            --mid-background: #15151A;  /* Mid-level Surface */
-            --light-surface: #202025;   /* Card Background */
-            --text-light: #E0E0E0;      /* Near White Text */
-            --text-muted: #8A8A99;      /* Muted Corporate Gray */
-            --card-border: 1px solid rgba(255, 255, 255, 0.1);
-            --card-shadow: 0 4px 15px rgba(0, 0, 0, 0.5), 0 0 5px rgba(255, 195, 0, 0.05) inset;
-        }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', sans-serif;
-            background: var(--dark-background);
-            color: var(--text-light);
-            /* Minimal subtle texture */
-            background-image: radial-gradient(var(--mid-background) 0.5px, transparent 0), radial-gradient(var(--mid-background) 0.5px, transparent 0);
-            background-size: 20px 20px;
-            background-position: 0 0, 10px 10px;
-        }
-
-        /* Navigation */
-        .nav-bar {
-            background: rgba(11, 11, 15, 0.95);
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .logo {
-            font-size: 1.6rem;
-            font-weight: 800;
-            color: var(--accent-gold);
-            letter-spacing: -0.8px;
-        }
-
-        /* Hero Section */
-        .hero-section {
-            background: linear-gradient(180deg, rgba(255, 195, 0, 0.05) 0%, rgba(0, 0, 0, 0) 100%);
-            padding: 5rem 2rem 2.5rem;
-        }
-
-        .hero-title {
-            font-size: 4.5rem;
-            font-weight: 900;
-            letter-spacing: -2.5px;
-            margin-bottom: 0.5rem;
-            background: linear-gradient(90deg, var(--text-light) 0%, var(--accent-gold) 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .hero-subtitle {
-            font-size: 1.35rem;
-            color: var(--text-muted);
-            margin-bottom: 1.5rem;
-        }
-        
-        /* Toggle Switch */
-        .toggle-switch-container {
-            background: var(--light-surface);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
-            padding: 0.25rem;
-        }
-        .toggle-btn {
-            font-weight: 600;
-            color: var(--text-light);
-        }
-
-        /* Filter Bar */
-        .filter-section {
-            padding: 2rem 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .filter-input {
-            /* These hidden inputs are still defined in HTML but hidden by JS below */
-            display: none; 
-        }
-
-        .filter-chip {
-            background: var(--light-surface);
-            border: var(--card-border);
-            font-weight: 600;
-        }
-
-        .filter-chip:hover {
-            border-color: var(--accent-gold);
-            background: var(--mid-background);
-        }
-
-        .filter-chip.active {
-            background: var(--primary-color);
-            border-color: var(--primary-color);
-            color: white;
-            box-shadow: 0 4px 10px rgba(94, 114, 228, 0.4);
-        }
-        
-        .date-display {
-            /* Now acting as a prominent selectable chip */
-            background: var(--accent-gold); 
-            color: #333;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.2s;
-            border: 1px solid var(--accent-gold);
-            padding: 0.75rem 1.5rem;
-        }
-        .date-display:hover {
-            background: #FFD45A;
-        }
-
-        .clear-btn {
-            background: var(--light-surface);
-            border: var(--card-border);
-            font-weight: 600;
-            color: var(--text-light);
-        }
-        
-        #exportBtn {
-            background: var(--accent-green) !important;
-            border-color: var(--accent-green) !important;
-        }
-
-        /* Stats Cards */
-        .stat-card {
-            background: var(--light-surface);
-            border: 1px solid var(--mid-background);
-            border-top: 3px solid var(--accent-gold); /* Gold highlight border */
-            border-radius: 0.75rem;
-            box-shadow: var(--card-shadow);
-        }
-
-        .stat-card:hover {
-            transform: translateY(-5px);
-            border-color: rgba(255, 195, 0, 0.5);
-            box-shadow: 0 15px 35px rgba(255, 195, 0, 0.15);
-        }
-
-        .stat-number {
-            font-size: 3.2rem;
-            font-weight: 900;
-            color: var(--accent-gold);
-        }
-
-        .stat-label {
-            color: var(--text-muted);
-            font-weight: 600;
-            letter-spacing: 0.5px;
-        }
-        
-        /* Engineer Cards */
-        .card {
-            background: var(--light-surface);
-            border: var(--card-border);
-            box-shadow: var(--card-shadow);
-        }
-        .card:hover {
-            border-color: var(--primary-color);
-            box-shadow: 0 10px 30px rgba(94, 114, 228, 0.1);
-        }
-
-        .card-title {
-            color: var(--accent-gold);
-            font-weight: 700;
-        }
-        
-        .progress-bar {
-            background: var(--mid-background);
-        }
-
-        .progress-fill {
-            background: linear-gradient(90deg, var(--primary-color) 0%, var(--accent-gold) 100%);
-        }
-
-        .progress-label span:last-child {
-            color: var(--accent-gold);
-        }
-        
-        /* Table */
-        .table-wrapper {
-            background: var(--light-surface);
-            border: var(--card-border);
-            box-shadow: var(--card-shadow);
-        }
-        th {
-            background: var(--mid-background);
-            color: var(--text-muted);
-            font-size: 0.9rem;
-            letter-spacing: 0.8px;
-        }
-        tr:hover {
-            background: rgba(255, 195, 0, 0.05); /* Subtle amber hover */
-        }
-        
-        /* Badges */
-        .badge-completed, .badge-resolved, .badge-closed { background: var(--accent-green); }
-        .badge-in-progress, .badge-open, .badge-pending { background: var(--primary-color); }
-        .badge-blocked { background: #FF4136; color: white; }
-        .badge-on-hold { background: var(--accent-gold); color: #333; font-weight: 700; } 
+      /* Loader Animation */
+      .loader {
+        border: 2px solid #27272a;
+        border-top: 2px solid #FFC300;
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        animation: spin 1s linear infinite;
+      }
+      @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
-<body>
-    <div class="nav-bar">
-        <div class="nav-content">
-            <div class="logo">🎯 EXECUTIVE COMMAND</div>
-            <div class="nav-actions">
-                <button id="refreshBtn" class="toggle-btn" style="background: var(--light-surface); color: var(--text-light);" onmouseover="this.style.background='var(--mid-background)'" onmouseout="this.style.background='var(--light-surface)'">🔄 Refresh</button>
-                <div style="font-size: 0.875rem; color: var(--text-muted);">Last updated: <span id="lastUpdate">now</span></div>
+<body class="font-sans antialiased min-h-screen flex flex-col">
+
+    <nav class="glass-panel sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="w-2 h-8 bg-executive-gold rounded-full"></div>
+                <h1 class="text-xl font-bold tracking-tight text-white">COMMAND <span class="text-gray-500 font-light">CENTER</span></h1>
+            </div>
+            <div class="flex items-center gap-4">
+                <span id="lastUpdate" class="text-xs text-gray-500 font-mono">Synced: --:--</span>
+                <button id="refreshBtn" class="flex items-center gap-2 px-4 py-2 bg-executive-900 border border-executive-800 rounded-lg text-sm font-medium hover:bg-executive-800 hover:text-white transition-all text-gray-400">
+                    <span id="refreshIcon">↻</span> Refresh
+                </button>
             </div>
         </div>
-    </div>
+    </nav>
 
-    <div class="hero-section">
-        <div class="hero-content">
-            <h1 class="hero-title">Unified Team Performance</h1>
-            <p class="hero-subtitle">Real-time insights across Engineering Tasks and Helpdesk Operations</p>
-            
-            <div class="toggle-switch-container">
-                <button id="trackerToggle" class="toggle-btn" onclick="dashboard.switchDataSource('tracker')">📋 Engineering Tasks</button>
-                <button id="freshserviceToggle" class="toggle-btn" onclick="dashboard.switchDataSource('freshservice')">🎫 Helpdesk Tickets</button>
-            </div>
-        </div>
-    </div>
+    <main class="flex-1 max-w-7xl mx-auto px-6 py-10 w-full space-y-10">
 
-    <div class="main-container">
-        <div class="filter-section">
-            <div class="filter-bar">
-                <input type="date" id="startDate" class="filter-input" placeholder="Start Date">
-                <input type="date" id="endDate" class="filter-input" placeholder="End Date">
-                
-                <button class="date-display" id="dateDisplay" onclick="dashboard.openDateModal()">Select Date Range</button>
-                
-                <button class="clear-btn" onclick="dashboard.clearAllFilters()">Clear Filters</button>
-                <button class="clear-btn" id="exportBtn">📥 Export</button>
-            </div>
-
-            <div style="margin-bottom: 1.5rem;">
-                <div style="font-size: 0.875rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px;" id="engineerFilterLabel">Engineers</div>
-                <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;" id="engineerFilters"></div>
-            </div>
-
+        <div class="flex flex-col md:flex-row justify-between items-end gap-6 border-b border-white/5 pb-10">
             <div>
-                <div style="font-size: 0.875rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px;">Status</div>
-                <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;" id="statusFilters"></div>
+                <h2 class="text-4xl md:text-5xl font-extrabold text-white tracking-tight mb-2">Team Performance</h2>
+                <p class="text-gray-400">Real-time operational intelligence and metric tracking.</p>
+            </div>
+            
+            <div class="bg-executive-900 p-1 rounded-lg border border-executive-800 flex">
+                <button id="trackerToggle" onclick="dashboard.switchDataSource('tracker')" class="px-6 py-2 rounded-md text-sm font-medium transition-all text-gray-400 hover:text-white">
+                    Team Tracker
+                </button>
+                <button id="freshserviceToggle" onclick="dashboard.switchDataSource('freshservice')" class="px-6 py-2 rounded-md text-sm font-medium transition-all text-gray-400 hover:text-white">
+                    Freshservice
+                </button>
             </div>
         </div>
 
-        <div class="stats-section">
-            <div class="stats-grid" id="statsGrid"></div>
-        </div>
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            <div class="lg:col-span-1 space-y-4">
+                <label class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Timeframe</label>
+                <div class="flex flex-col gap-2">
+                    <input type="date" id="startDate" class="bg-executive-900 border border-executive-800 rounded-lg px-4 py-2 text-sm text-gray-300 focus:outline-none focus:border-executive-gold focus:ring-1 focus:ring-executive-gold transition-colors">
+                    <input type="date" id="endDate" class="bg-executive-900 border border-executive-800 rounded-lg px-4 py-2 text-sm text-gray-300 focus:outline-none focus:border-executive-gold focus:ring-1 focus:ring-executive-gold transition-colors">
+                    <div class="flex justify-between mt-2">
+                        <button onclick="dashboard.clearAllFilters()" class="text-xs text-gray-500 hover:text-white underline decoration-dotted">Clear Filters</button>
+                        <button id="exportBtn" class="text-xs text-executive-gold hover:text-executive-goldDim font-medium flex items-center gap-1">
+                            ⬇ Export CSV
+                        </button>
+                    </div>
+                </div>
+            </div>
 
-        <div class="cards-section">
-            <h2 class="section-title" id="engineerCardsTitle">Engineer Performance</h2>
-            <div class="cards-grid" id="engineerCards"></div>
-        </div>
-
-        <div class="table-section">
-            <h2 class="section-title" id="tableTitle">Team Activity</h2>
-            <div class="table-wrapper">
-                <div id="tableContent"></div>
+            <div class="lg:col-span-3 space-y-4">
+                <div>
+                    <div class="flex justify-between items-center mb-2">
+                        <label id="engineerFilterLabel" class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Personnel</label>
+                        <span class="text-[10px] text-gray-600 bg-executive-900 px-2 py-0.5 rounded border border-executive-800">Multi-select</span>
+                    </div>
+                    <div id="engineerFilters" class="flex flex-wrap gap-2 max-h-24 overflow-y-auto pr-2 custom-scrollbar">
+                        </div>
+                </div>
+                <div>
+                    <label class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 block">Status</label>
+                    <div id="statusFilters" class="flex flex-wrap gap-2">
+                        </div>
+                </div>
             </div>
         </div>
-    </div>
 
-    <div class="modal-overlay" id="dateModal">
-        <div class="modal">
-            <div class="modal-title">Select Date Range</div>
-            <input type="date" id="modalStart" class="modal-input" placeholder="Start Date">
-            <input type="date" id="modalEnd" class="modal-input" placeholder="End Date">
-            <div class="modal-buttons">
-                <button class="btn-secondary" onclick="document.getElementById('dateModal').classList.remove('active')">Cancel</button>
-                <button class="btn-primary" onclick="dashboard.applyDateRangeFromModal()">Apply</button>
+        <div id="statsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            </div>
+
+        <div class="space-y-6">
+            <h3 id="engineerCardsTitle" class="text-xl font-bold text-white border-l-4 border-executive-gold pl-4">Performance Metrics</h3>
+            <div id="engineerCards" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                </div>
+        </div>
+
+        <div class="space-y-6">
+             <div class="flex justify-between items-center">
+                <h3 id="tableTitle" class="text-xl font-bold text-white border-l-4 border-executive-blue pl-4">Activity Log</h3>
+                <div class="text-sm text-gray-500" id="recordCount"></div>
+            </div>
+            
+            <div class="bg-executive-900 border border-executive-800 rounded-xl overflow-hidden shadow-2xl">
+                <div class="overflow-x-auto">
+                    <div id="tableContent">
+                        </div>
+                </div>
             </div>
         </div>
-    </div>
+
+    </main>
+
+    <footer class="border-t border-white/5 mt-auto py-8">
+        <div class="max-w-7xl mx-auto px-6 text-center text-gray-600 text-sm">
+            <p>&copy; 2024 IT Operations Dashboard. Internal Use Only.</p>
+        </div>
+    </footer>
 
     <script>
         const CONFIG = {
-            APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbz1jIz73VKcat6GmkqovmqtXHyago4bimxxeaVWekniYU_lowq-e4t9FV1r2PSUqziIKw/exec', 
-            API_KEY: '98415623-a1d1-4045-84d3-c3e67fa687af',        
+            APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbz1jIz73VKcat6GmkqovmqtXHyago4bimxxeaVWekniYU_lowq-e4t9FV1r2PSUqziIKw/exec', // Replace with your actual URL
+            API_KEY: '98415623-a1d1-4045-84d3-c3e67fa687af',        // Replace with your actual Key
             REFRESH_INTERVAL: 300000,
-            ENABLE_DEMO: false, 
+            ENABLE_DEMO: false, // Set to false to use live API
             ORG_NAME: 'Your Organization'
         };
 
@@ -332,59 +215,68 @@
             }
 
             async init() {
-                // Initialize the UI, set default toggle state, and start the initial load
                 await this.switchDataSource(this.currentSource, false); 
                 this.render();
                 setInterval(() => this.loadData(), CONFIG.REFRESH_INTERVAL);
             }
 
-            // Fix: Added method to open modal, used by the dateDisplay button
-            openDateModal() {
-                document.getElementById('modalStart').value = this.filters.dateRange.start;
-                document.getElementById('modalEnd').value = this.filters.dateRange.end;
-                document.getElementById('dateModal').classList.add('active');
+            /**
+             * Helper to retrieve fields safely regardless of API key casing (e.g. "Agent Name" vs "agent_name")
+             */
+            getFieldValue(item, fieldType) {
+                if (!item) return '';
+                
+                // Possible variations for Agent/Engineer
+                if (fieldType === 'engineer') {
+                    return item['Engineer'] || item['engineer'] || item['Agent Name'] || item['agent_name'] || item['agent'] || item['Responder'] || 'Unassigned';
+                }
+                
+                // Possible variations for Date
+                if (fieldType === 'date') {
+                    return item['Start Date'] || item['start_date'] || item['Created Date'] || item['created_at'] || '';
+                }
+
+                return '';
             }
 
             async switchDataSource(source, reload = true) {
                 this.currentSource = source;
                 
-                const primaryColor = '#5e72e4';
-                const textColor = '#E0E0E0';
+                // Styling the Toggles
+                const activeClass = "bg-executive-gold text-executive-950 font-bold shadow-lg";
+                const inactiveClass = "text-gray-400 hover:text-white";
 
                 const trackerBtn = document.getElementById('trackerToggle');
                 const fsBtn = document.getElementById('freshserviceToggle');
 
-                // Apply styling
-                trackerBtn.style.backgroundColor = source === 'tracker' ? primaryColor : 'transparent';
-                trackerBtn.style.color = source === 'tracker' ? 'white' : textColor;
-                fsBtn.style.backgroundColor = source === 'freshservice' ? primaryColor : 'transparent';
-                fsBtn.style.color = source === 'freshservice' ? 'white' : textColor;
+                // Reset classes
+                trackerBtn.className = "px-6 py-2 rounded-md text-sm transition-all duration-300 " + (source === 'tracker' ? activeClass : inactiveClass);
+                fsBtn.className = "px-6 py-2 rounded-md text-sm transition-all duration-300 " + (source === 'freshservice' ? activeClass : inactiveClass);
                 
-                // Update Titles and Labels
-                document.getElementById('engineerCardsTitle').textContent = source === 'tracker' ? 'Engineer Performance' : 'Agent Performance';
-                document.getElementById('tableTitle').textContent = source === 'tracker' ? 'Engineering Task Activity' : 'Helpdesk Ticket Activity';
+                // Update Titles
+                document.getElementById('engineerCardsTitle').textContent = source === 'tracker' ? 'Engineer Output' : 'Agent Resolution Stats';
+                document.getElementById('tableTitle').textContent = source === 'tracker' ? 'Engineering Tasks' : 'Helpdesk Tickets';
                 document.getElementById('engineerFilterLabel').textContent = source === 'tracker' ? 'ENGINEERS' : 'AGENTS';
 
                 if (reload) {
-                    // Reset Filters UI
                     this.filters = { engineers: [], statuses: [], dateRange: { start: '', end: '' } };
                     document.getElementById('startDate').value = '';
                     document.getElementById('endDate').value = '';
-                    document.getElementById('dateDisplay').textContent = 'Select Date Range';
-                    
                     await this.loadData();
                 }
             }
 
             async loadData() {
+                const refreshIcon = document.getElementById('refreshIcon');
+                refreshIcon.classList.add('animate-spin');
+
                 try {
                     if (CONFIG.ENABLE_DEMO) {
+                        // Simulate network delay
+                        await new Promise(r => setTimeout(r, 600)); 
                         this.data = this.currentSource === 'tracker' ? DEMO_DATA_TRACKER : DEMO_DATA_FRESHSERVICE;
                         
-                        // Use the correct field dynamically for metadata extraction (FIXED: Ensure Agent Name is correctly mapped)
-                        const engineerField = this.currentSource === 'freshservice' ? 'Agent Name' : 'Engineer';
-                        
-                        const engineerList = this.data.map(d => d[engineerField]).filter(Boolean);
+                        const engineerList = this.data.map(d => this.getFieldValue(d, 'engineer')).filter(n => n && n !== 'Unassigned');
                         const statusList = this.data.map(d => d.Status).filter(Boolean);
                         
                         this.metadata = {
@@ -392,41 +284,38 @@
                             statuses: [...new Set(statusList)].sort()
                         };
                     } else {
-                        if (!CONFIG.APPS_SCRIPT_URL || !CONFIG.API_KEY) {
+                        // ... Live API Fetch Logic (Same as before) ...
+                         if (!CONFIG.APPS_SCRIPT_URL || !CONFIG.API_KEY) {
                             throw new Error('Missing CONFIG: APPS_SCRIPT_URL or API_KEY');
                         }
-
                         const [dataRes, metaRes] = await Promise.all([
                             fetch(`${CONFIG.APPS_SCRIPT_URL}?action=getData&source=${this.currentSource}&key=${CONFIG.API_KEY}`),
                             fetch(`${CONFIG.APPS_SCRIPT_URL}?action=getMetadata&source=${this.currentSource}&key=${CONFIG.API_KEY}`)
                         ]);
-
                         const data = await dataRes.json();
                         const meta = await metaRes.json();
-
                         if (!data.success) throw new Error(data.message);
                         if (!meta.success) throw new Error(meta.message);
-
                         this.data = data.data;
                         this.metadata = meta.data;
                     }
 
                     this.applyFilters();
                     this.render();
+                    document.getElementById('lastUpdate').textContent = 'Synced: ' + new Date().toLocaleTimeString();
                 } catch (error) {
                     console.error('Error:', error);
                     alert('Error loading data: ' + error.message);
+                } finally {
+                    refreshIcon.classList.remove('animate-spin');
                 }
             }
 
             applyFilters() {
                 let filtered = [...this.data];
 
-                const engineerField = this.currentSource === 'freshservice' ? 'Agent Name' : 'Engineer';
-                const dateField = this.currentSource === 'freshservice' ? 'Created Date' : 'Start Date';
-
                 if (this.filters.engineers.length > 0) {
-                    filtered = filtered.filter(item => this.filters.engineers.includes(item[engineerField]));
+                    filtered = filtered.filter(item => this.filters.engineers.includes(this.getFieldValue(item, 'engineer')));
                 }
 
                 if (this.filters.statuses.length > 0) {
@@ -438,7 +327,9 @@
                     const end = new Date(this.filters.dateRange.end);
                     
                     filtered = filtered.filter(item => {
-                        const date = new Date(item[dateField]);
+                        const dateStr = this.getFieldValue(item, 'date');
+                        if (!dateStr) return false;
+                        const date = new Date(dateStr);
                         return date >= start && date <= end; 
                     });
                 }
@@ -448,22 +339,16 @@
 
             toggleEngineerFilter(engineer) {
                 const idx = this.filters.engineers.indexOf(engineer);
-                if (idx > -1) {
-                    this.filters.engineers.splice(idx, 1);
-                } else {
-                    this.filters.engineers.push(engineer);
-                }
+                if (idx > -1) this.filters.engineers.splice(idx, 1);
+                else this.filters.engineers.push(engineer);
                 this.applyFilters();
                 this.render();
             }
 
             toggleStatusFilter(status) {
                 const idx = this.filters.statuses.indexOf(status);
-                if (idx > -1) {
-                    this.filters.statuses.splice(idx, 1);
-                } else {
-                    this.filters.statuses.push(status);
-                }
+                if (idx > -1) this.filters.statuses.splice(idx, 1);
+                else this.filters.statuses.push(status);
                 this.applyFilters();
                 this.render();
             }
@@ -472,42 +357,8 @@
                 this.filters = { engineers: [], statuses: [], dateRange: { start: '', end: '' } };
                 document.getElementById('startDate').value = '';
                 document.getElementById('endDate').value = '';
-                document.getElementById('dateDisplay').textContent = 'Select Date Range';
                 this.applyFilters();
                 this.render();
-            }
-
-            applyDateRangeFromModal() {
-                const start = document.getElementById('modalStart').value;
-                const end = document.getElementById('modalEnd').value;
-                if (start && end) {
-                    this.filters.dateRange = { start, end };
-                    document.getElementById('startDate').value = start;
-                    document.getElementById('endDate').value = end;
-                    this.updateDateDisplay();
-                    document.getElementById('dateModal').classList.remove('active');
-                    this.applyFilters();
-                    this.render();
-                }
-            }
-
-            updateDateDisplay() {
-                const start = this.filters.dateRange.start;
-                const end = this.filters.dateRange.end;
-                if (start && end) {
-                    // Formats date nicely for display, removing year if redundant but keeping YYYY-MM-DD format for consistency
-                    const format = (dateStr) => {
-                        try {
-                            const date = new Date(dateStr);
-                            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-                        } catch {
-                            return dateStr;
-                        }
-                    };
-                    document.getElementById('dateDisplay').textContent = `${format(start)} to ${format(end)}`;
-                } else {
-                     document.getElementById('dateDisplay').textContent = 'Select Date Range';
-                }
             }
 
             getMetrics() {
@@ -537,18 +388,16 @@
 
             getEngineerStats() {
                 const stats = {};
-                const engineerField = this.currentSource === 'freshservice' ? 'Agent Name' : 'Engineer';
                 const completedStatuses = this.currentSource === 'freshservice' ? ['Resolved', 'Closed'] : ['Completed'];
                 
                 this.filteredData.forEach(item => {
-                    const name = item[engineerField];
-                    if (!name) return;
+                    const name = this.getFieldValue(item, 'engineer');
+                    if (!name || name === 'Unassigned') return;
                     
                     if (!stats[name]) {
-                        stats[name] = { total: 0, completed: 0, inProgress: 0, blocked: 0 };
+                        stats[name] = { total: 0, completed: 0 };
                     }
                     stats[name].total++;
-                    
                     if (completedStatuses.includes(item.Status)) stats[name].completed++;
                 });
 
@@ -562,25 +411,23 @@
             }
 
             exportCSV() {
-                let headers, rows;
+                // ... same export logic ...
+                 let headers, rows;
                 const source = this.currentSource;
-                
                 if (source === 'freshservice') {
-                    headers = ['ID', 'Type', 'Status', 'Priority', 'Subject', 'Description', 'Requester Name', 'Requester Email', 'Created Date', 'Location', 'Urgency', 'Impact', 'Issue Category', 'Source', 'Resolved Date', 'Closed Date', 'Function', 'Survey Score', 'Maximum Survey Score', 'Agent Name'];
-                    rows = this.filteredData.map(item => headers.map(header => item[header] || '-'));
-                } else { // tracker
-                    headers = ['Task', 'Sub-Task', 'Engineer', 'Status', 'Start Date', 'Closure Date', 'Blocker/Dependency'];
+                    headers = ['ID', 'Type', 'Status', 'Priority', 'Subject', 'Agent Name', 'Created Date', 'Resolved Date'];
+                    rows = this.filteredData.map(item => [item.ID, item.Type, item.Status, item.Priority, item.Subject, this.getFieldValue(item, 'engineer'), item['Created Date'], item['Resolved Date']]);
+                } else { 
+                    headers = ['Task', 'Sub-Task', 'Engineer', 'Status', 'Start Date', 'Closure Date', 'Blocker'];
                     rows = this.filteredData.map(item => [
-                        item.Task, item['Sub-Task'], item.Engineer, item.Status,
-                        item['Start Date'], item['Closure Date'] || '-', item['Blocker/Dependency'] || '-'
+                        item.Task, item['Sub-Task'], this.getFieldValue(item, 'engineer'), item.Status, item['Start Date'], item['Closure Date'], item['Blocker/Dependency']
                     ]);
                 }
-
-                const csv = [headers, ...rows].map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
+                const csv = [headers, ...rows].map(row => (row || []).map(cell => `"${cell || ''}"`).join(',')).join('\n');
                 const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
                 const link = document.createElement('a');
                 link.href = URL.createObjectURL(blob);
-                link.download = `${source}-data-${new Date().toISOString().split('T')[0]}.csv`;
+                link.download = `report_${new Date().toISOString().slice(0,10)}.csv`;
                 link.click();
             }
 
@@ -589,181 +436,189 @@
                 this.renderStats();
                 this.renderEngineerCards();
                 this.renderTable();
-                document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString();
+                document.getElementById('recordCount').innerText = `${this.filteredData.length} records found`;
             }
 
             renderFilters() {
                 const engineerList = this.metadata.engineers || [];
-
-                const engineerHTML = engineerList.map(eng => `
-                    <button class="filter-chip ${this.filters.engineers.includes(eng) ? 'active' : ''}" onclick="dashboard.toggleEngineerFilter('${eng}')">
-                        ${eng}
-                    </button>
-                `).join('');
+                const engineerHTML = engineerList.map(eng => {
+                    const isActive = this.filters.engineers.includes(eng);
+                    return `
+                        <button class="px-3 py-1 text-xs font-medium rounded-full border transition-all duration-200 ${isActive ? 'bg-executive-gold text-executive-950 border-executive-gold' : 'bg-executive-900 text-gray-400 border-executive-800 hover:border-executive-700 hover:text-white'}" onclick="dashboard.toggleEngineerFilter('${eng}')">
+                            ${eng}
+                        </button>
+                    `;
+                }).join('');
                 document.getElementById('engineerFilters').innerHTML = engineerHTML;
 
                 const statusHTML = (this.metadata.statuses || []).map(status => {
-                    const cssClass = status.toLowerCase().replace(/\s+/g, '-');
+                    const isActive = this.filters.statuses.includes(status);
                     return `
-                        <button class="filter-chip ${this.filters.statuses.includes(status) ? 'active' : ''}" onclick="dashboard.toggleStatusFilter('${status}')">
+                        <button class="px-3 py-1 text-xs font-medium rounded-full border transition-all duration-200 ${isActive ? 'bg-executive-blue text-white border-executive-blue' : 'bg-executive-900 text-gray-400 border-executive-800 hover:border-executive-700 hover:text-white'}" onclick="dashboard.toggleStatusFilter('${status}')">
                             ${status}
                         </button>
                     `;
                 }).join('');
                 document.getElementById('statusFilters').innerHTML = statusHTML;
-
-                // Call updateDateDisplay to show the current range/default text
-                this.updateDateDisplay();
             }
 
             renderStats() {
                 const metrics = this.getMetrics();
-                
                 const completedLabel = this.currentSource === 'tracker' ? 'Completed Tasks' : 'Resolved/Closed';
-                const inProgressLabel = this.currentSource === 'tracker' ? 'In Progress' : 'Open / Pending';
-                const blockedLabel = this.currentSource === 'tracker' ? 'Blocked' : 'High Priority Open';
+                const blockedLabel = this.currentSource === 'tracker' ? 'Blocked Items' : 'High Priority Open';
 
-                const statsHTML = `
-                    <div class="stat-card">
-                        <div class="stat-number">${metrics.total}</div>
-                        <div class="stat-label">Total Items</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-number" style="color: var(--accent-green);">${metrics.completed}</div>
-                        <div class="stat-label">${completedLabel}</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-number" style="color: var(--primary-color);">${metrics.inProgress}</div>
-                        <div class="stat-label">${inProgressLabel}</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-number" style="color: #FF4136;">${metrics.blocked}</div>
-                        <div class="stat-label">${blockedLabel}</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-number" style="color: var(--accent-gold);">${metrics.completionRate}%</div>
-                        <div class="stat-label">Completion Rate (Resolved)</div>
+                const createCard = (label, value, colorClass, subtext) => `
+                    <div class="bg-executive-900 border border-executive-800 rounded-xl p-6 relative overflow-hidden group hover:border-executive-700 transition-colors">
+                        <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                            <div class="w-16 h-16 rounded-full bg-${colorClass} blur-xl"></div>
+                        </div>
+                        <div class="relative z-10">
+                            <div class="text-4xl font-bold text-white mb-1 tracking-tighter">${value}</div>
+                            <div class="text-xs font-semibold uppercase tracking-wider text-gray-500">${label}</div>
+                            ${subtext ? `<div class="mt-2 text-xs text-${colorClass}">${subtext}</div>` : ''}
+                        </div>
                     </div>
                 `;
-                document.getElementById('statsGrid').innerHTML = statsHTML;
+
+                const html = `
+                    ${createCard('Total Volume', metrics.total, 'gray-400')}
+                    ${createCard(completedLabel, metrics.completed, 'executive-green', `${metrics.completionRate}% Efficiency`)}
+                    ${createCard('Active / In Progress', metrics.inProgress, 'executive-blue')}
+                    ${createCard(blockedLabel, metrics.blocked, 'executive-red', 'Requires Attention')}
+                `;
+                document.getElementById('statsGrid').innerHTML = html;
             }
 
             renderEngineerCards() {
                 const engineers = this.getEngineerStats();
-                const cardSubtitleText = this.currentSource === 'tracker' ? 'tasks completed' : 'items resolved/closed';
+                const cardSubtitleText = this.currentSource === 'tracker' ? 'tasks done' : 'tickets resolved';
                 
                 const cardsHTML = engineers.map(eng => `
-                    <div class="card">
-                        <div class="card-title">${eng.name}</div>
-                        <div class="card-subtitle">${eng.completed} of ${eng.total} ${cardSubtitleText}</div>
-                        <div class="progress-bar">
-                            <div class="progress-fill" style="width: ${eng.rate}%"></div>
+                    <div class="bg-executive-900 border border-executive-800 rounded-xl p-6 hover:shadow-lg hover:border-executive-700 transition-all duration-300">
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <h4 class="text-lg font-bold text-white">${eng.name}</h4>
+                                <p class="text-xs text-gray-500 uppercase tracking-wide mt-1">${eng.completed} / ${eng.total} ${cardSubtitleText}</p>
+                            </div>
+                            <div class="h-10 w-10 rounded-full bg-executive-950 border border-executive-800 flex items-center justify-center text-xs font-bold text-gray-300">
+                                ${eng.name.charAt(0)}
+                            </div>
                         </div>
-                        <div class="progress-label">
-                            <span>${eng.rate}% Complete</span>
-                            <span style="color: var(--accent-gold); font-weight: 600;">${eng.completed}/${eng.total}</span>
+                        
+                        <div class="relative pt-1">
+                            <div class="flex mb-2 items-center justify-between">
+                                <div class="text-right">
+                                    <span class="text-xs font-semibold inline-block text-${eng.rate > 75 ? 'executive-green' : (eng.rate > 40 ? 'executive-blue' : 'executive-gold')}">
+                                        ${eng.rate}% Success
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="overflow-hidden h-2 mb-4 text-xs flex rounded-full bg-executive-950 border border-executive-800">
+                                <div style="width:${eng.rate}%" class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center ${eng.rate > 75 ? 'bg-executive-green' : (eng.rate > 40 ? 'bg-executive-blue' : 'bg-executive-gold')} transition-all duration-1000 ease-out"></div>
+                            </div>
                         </div>
                     </div>
                 `).join('');
-                document.getElementById('engineerCards').innerHTML = cardsHTML;
+                document.getElementById('engineerCards').innerHTML = cardsHTML || '<div class="col-span-3 text-center text-gray-500 py-10 italic">No performance data available for current filters.</div>';
             }
 
             renderTable() {
                 if (this.filteredData.length === 0) {
                     document.getElementById('tableContent').innerHTML = `
-                        <div class="empty-state">
-                            <div class="empty-state-icon" style="color: var(--accent-gold);">📭</div>
-                            <div class="empty-state-title" style="color: var(--text-light);">No Items Found</div>
-                            <p style="color: var(--text-muted);">Try adjusting your filters or switching the data source.</p>
+                        <div class="p-12 text-center">
+                            <div class="text-4xl mb-4">📭</div>
+                            <h3 class="text-white font-medium mb-1">No Records Found</h3>
+                            <p class="text-gray-500 text-sm">Adjust filters or switch data sources.</p>
                         </div>
                     `;
                     return;
                 }
 
-                let tableHTML;
+                const getStatusBadge = (status) => {
+                    const s = status.toLowerCase();
+                    let color = 'bg-gray-800 text-gray-300 border-gray-700';
+                    if (['completed', 'resolved', 'closed'].some(x => s.includes(x))) color = 'bg-green-900/30 text-green-400 border-green-900';
+                    else if (['in progress', 'open', 'pending'].some(x => s.includes(x))) color = 'bg-blue-900/30 text-blue-400 border-blue-900';
+                    else if (['blocked', 'high'].some(x => s.includes(x))) color = 'bg-red-900/30 text-red-400 border-red-900';
+                    else if (['on hold'].some(x => s.includes(x))) color = 'bg-yellow-900/30 text-yellow-400 border-yellow-900';
+                    
+                    return `<span class="px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider border ${color}">${status}</span>`;
+                };
+
+                let tableHeader, tableRows;
                 
                 if (this.currentSource === 'freshservice') {
-                    tableHTML = `
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>ID / Subject</th>
-                                    <th>Agent Name</th>
-                                    <th>Status</th>
-                                    <th>Priority / Type</th>
-                                    <th>Created Date</th>
-                                    <th>Closed Date</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${this.filteredData.map(item => `
-                                    <tr>
-                                        <td><strong>#${item.ID || 'N/A'}</strong>: ${item.Subject || 'No Subject'}</td>
-                                        <td>${item['Agent Name'] || 'Unassigned'}</td>
-                                        <td><span class="badge badge-${item.Status.toLowerCase().replace(/\s+/g, '-')}">${item.Status}</span></td>
-                                        <td>${item.Priority || '–'} / ${item.Type || '–'}</td>
-                                        <td>${item['Created Date'] || '–'}</td>
-                                        <td>${item['Closed Date'] || '–'}</td>
-                                    </tr>
-                                `).join('')}
-                            </tbody>
-                        </table>
+                    tableHeader = `
+                        <th class="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Reference</th>
+                        <th class="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Agent</th>
+                        <th class="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
+                        <th class="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Created</th>
                     `;
-                } else { // tracker
-                    tableHTML = `
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Task</th>
-                                    <th>Sub-Task</th>
-                                    <th>Engineer</th>
-                                    <th>Status</th>
-                                    <th>Start Date</th>
-                                    <th>End Date</th>
-                                    <th>Notes</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${this.filteredData.map(item => `
-                                    <tr>
-                                        <td><strong>${item.Task || '–'}</strong></td>
-                                        <td>${item['Sub-Task'] || '–'}</td>
-                                        <td>${item.Engineer || '–'}</td>
-                                        <td><span class="badge badge-${item.Status.toLowerCase().replace(/\s+/g, '-')}">${item.Status}</span></td>
-                                        <td>${item['Start Date'] || '–'}</td>
-                                        <td>${item['Closure Date'] || '–'}</td>
-                                        <td>${item['Blocker/Dependency'] || '–'}</td>
-                                    </tr>
-                                `).join('')}
-                            </tbody>
-                        </table>
+                    tableRows = this.filteredData.map(item => `
+                        <tr class="border-b border-executive-800 hover:bg-white/5 transition-colors">
+                            <td class="px-6 py-4">
+                                <div class="text-sm font-bold text-white">#${item.ID || '?'}</div>
+                                <div class="text-xs text-gray-500 truncate max-w-xs">${item.Subject || 'No Subject'}</div>
+                            </td>
+                            <td class="px-6 py-4 text-sm text-gray-300">${this.getFieldValue(item, 'engineer')}</td>
+                            <td class="px-6 py-4">${getStatusBadge(item.Status)}</td>
+                            <td class="px-6 py-4 text-xs text-gray-500 font-mono">${item['Created Date'] || '-'}</td>
+                        </tr>
+                    `).join('');
+                } else {
+                    tableHeader = `
+                        <th class="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Task</th>
+                        <th class="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Engineer</th>
+                        <th class="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
+                        <th class="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Timeline</th>
                     `;
+                    tableRows = this.filteredData.map(item => `
+                        <tr class="border-b border-executive-800 hover:bg-white/5 transition-colors">
+                            <td class="px-6 py-4">
+                                <div class="text-sm font-bold text-white">${item.Task}</div>
+                                <div class="text-xs text-gray-500">${item['Sub-Task'] || ''}</div>
+                                ${item['Blocker/Dependency'] ? `<div class="mt-1 text-[10px] text-red-400">⚠️ ${item['Blocker/Dependency']}</div>` : ''}
+                            </td>
+                            <td class="px-6 py-4 text-sm text-gray-300">${this.getFieldValue(item, 'engineer')}</td>
+                            <td class="px-6 py-4">${getStatusBadge(item.Status)}</td>
+                            <td class="px-6 py-4 text-xs text-gray-500 font-mono">
+                                <div>Start: ${item['Start Date']}</div>
+                                ${item['Closure Date'] ? `<div>End: ${item['Closure Date']}</div>` : ''}
+                            </td>
+                        </tr>
+                    `).join('');
                 }
-                
-                document.getElementById('tableContent').innerHTML = tableHTML;
+
+                document.getElementById('tableContent').innerHTML = `
+                    <table class="w-full text-left border-collapse">
+                        <thead class="bg-executive-950 border-b border-executive-800">
+                            <tr>${tableHeader}</tr>
+                        </thead>
+                        <tbody class="divide-y divide-executive-800">
+                            ${tableRows}
+                        </tbody>
+                    </table>
+                `;
             }
         }
 
         let dashboard;
         window.addEventListener('DOMContentLoaded', () => {
+            dashboard = new Dashboard();
+            
+            // Event Listeners for Filters
             document.getElementById('refreshBtn').addEventListener('click', () => dashboard.loadData());
             document.getElementById('exportBtn').addEventListener('click', () => dashboard.exportCSV());
             
-            // The two hidden inputs are only used to store the values from the modal
-            document.getElementById('startDate').addEventListener('change', (e) => {
-                dashboard.filters.dateRange.start = e.target.value;
-                dashboard.updateDateDisplay();
+            const handleDateChange = () => {
+                dashboard.filters.dateRange.start = document.getElementById('startDate').value;
+                dashboard.filters.dateRange.end = document.getElementById('endDate').value;
                 dashboard.applyFilters();
                 dashboard.render();
-            });
-            document.getElementById('endDate').addEventListener('change', (e) => {
-                dashboard.filters.dateRange.end = e.target.value;
-                dashboard.updateDateDisplay();
-                dashboard.applyFilters();
-                dashboard.render();
-            });
+            };
             
-            dashboard = new Dashboard();
+            document.getElementById('startDate').addEventListener('change', handleDateChange);
+            document.getElementById('endDate').addEventListener('change', handleDateChange);
         });
     </script>
 </body>
