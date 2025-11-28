@@ -416,7 +416,7 @@
 <body>
     <div class="nav-bar">
         <div class="nav-content">
-            <div class="logo">📊 Team Tracker</div>
+            <div class="logo"> IT Team Tracker</div>
             <div class="nav-actions">
                 <button id="refreshBtn" class="toggle-btn" style="background: var(--light-surface); color: var(--text-light);" onmouseover="this.style.background='#161b22'" onmouseout="this.style.background='#21262d'">🔄 Refresh</button>
                 <div style="font-size: 0.875rem; color: var(--text-muted);">Last updated: <span id="lastUpdate">now</span></div>
@@ -491,8 +491,8 @@
             APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbz1jIz73VKcat6GmkqovmqtXHyago4bimxxeaVWekniYU_lowq-e4t9FV1r2PSUqziIKw/exec', // Replace with your actual URL
             API_KEY: '98415623-a1d1-4045-84d3-c3e67fa687af',        // Replace with your actual Key
             REFRESH_INTERVAL: 300000,
-            ENABLE_DEMO: false, // Set to false to use live data
-            ORG_NAME: 'Moengage'
+            ENABLE_DEMO: false, // IMPORTANT: Set to TRUE for reliable local testing
+            ORG_NAME: 'Your Organization'
         };
 
         const DEMO_DATA_TRACKER = [
@@ -528,19 +528,18 @@
             }
 
             async init() {
-                // Initialize the UI and load default data source
+                // Initialize the UI, set default toggle state, and start the initial load
                 await this.switchDataSource(this.currentSource, false); 
                 this.render();
                 setInterval(() => this.loadData(), CONFIG.REFRESH_INTERVAL);
             }
 
-            // Logic to switch data source and update UI (FIXED)
+            // Logic to switch data source and update UI (FIXED: Added logic to trigger loadData)
             async switchDataSource(source, reload = true) {
                 this.currentSource = source;
                 
                 // Use explicit colors to fix CSS variable reading in inline JS
                 const primaryColor = '#5e72e4';
-                const lightSurface = '#21262d'; 
                 const textColor = '#f1f5f9';
 
                 const trackerBtn = document.getElementById('trackerToggle');
@@ -551,14 +550,20 @@
                 fsBtn.style.backgroundColor = source === 'freshservice' ? primaryColor : 'transparent';
                 fsBtn.style.color = source === 'freshservice' ? 'white' : textColor;
                 
-                // Update Titles (FIXED)
+                // Update Titles
                 document.getElementById('engineerCardsTitle').textContent = source === 'tracker' ? 'Engineer Performance' : 'Agent Performance';
                 document.getElementById('tableTitle').textContent = source === 'tracker' ? 'Engineering Task Activity' : 'Helpdesk Ticket Activity';
                 document.getElementById('engineerFilterLabel').textContent = source === 'tracker' ? 'ENGINEERS' : 'AGENTS';
 
                 if (reload) {
-                    // Clear filters, then reload and render
-                    this.clearAllFilters(); // Clears filters and calls applyFilters/render
+                    // Reset Filters UI
+                    this.filters = { engineers: [], statuses: [], dateRange: { start: '', end: '' } };
+                    document.getElementById('startDate').value = '';
+                    document.getElementById('endDate').value = '';
+                    document.getElementById('dateDisplay').textContent = 'Select date range';
+                    
+                    // Trigger data reload for the new source
+                    await this.loadData();
                 }
             }
 
@@ -569,7 +574,6 @@
                         
                         const engineerField = this.currentSource === 'freshservice' ? 'Agent Name' : 'Engineer';
                         
-                        // Dynamically determine available engineers/agents and statuses (FIXED)
                         const engineerList = this.data.map(d => d[engineerField]).filter(Boolean);
                         const statusList = this.data.map(d => d.Status).filter(Boolean);
                         
@@ -578,7 +582,6 @@
                             statuses: [...new Set(statusList)].sort()
                         };
                     } else {
-                        // Real API calls (as suggested in the previous response)
                         if (!CONFIG.APPS_SCRIPT_URL || !CONFIG.API_KEY) {
                             throw new Error('Missing CONFIG: APPS_SCRIPT_URL or API_KEY');
                         }
@@ -602,14 +605,18 @@
                     this.render();
                 } catch (error) {
                     console.error('Error:', error);
-                    alert('Error loading data: ' + error.message);
+                    // Check if the error is due to missing DEMO data, and provide a clearer message
+                    if (CONFIG.ENABLE_DEMO) {
+                        alert(`Error loading data from DEMO source for '${this.currentSource}'. Check console for details.`);
+                    } else {
+                        alert('Error loading data from Apps Script: ' + error.message);
+                    }
                 }
             }
 
             applyFilters() {
                 let filtered = [...this.data];
 
-                // Dynamic Field Selection (FIXED)
                 const engineerField = this.currentSource === 'freshservice' ? 'Agent Name' : 'Engineer';
                 const dateField = this.currentSource === 'freshservice' ? 'Created Date' : 'Start Date';
 
@@ -627,7 +634,6 @@
                     
                     filtered = filtered.filter(item => {
                         const date = new Date(item[dateField]);
-                        // Check if item date is between start and end date (inclusive)
                         return date >= start && date <= end; 
                     });
                 }
@@ -635,7 +641,7 @@
                 this.filteredData = filtered;
             }
 
-            // Other filter methods remain the same, calling applyFilters/render
+            // Other filter methods now work as intended because loadData is triggered first
             toggleEngineerFilter(engineer) {
                 const idx = this.filters.engineers.indexOf(engineer);
                 if (idx > -1) {
@@ -658,6 +664,7 @@
                 this.render();
             }
 
+            // Clear filters calls applyFilters and render, which is fine since loadData is called in switchDataSource
             clearAllFilters() {
                 this.filters = { engineers: [], statuses: [], dateRange: { start: '', end: '' } };
                 document.getElementById('startDate').value = '';
@@ -689,11 +696,10 @@
                 }
             }
 
-            // Dynamic Metrics Calculation (FIXED)
             getMetrics() {
                 const completedStatuses = this.currentSource === 'freshservice' ? ['Resolved', 'Closed'] : ['Completed'];
                 const inProgressStatuses = this.currentSource === 'freshservice' ? ['Open', 'Pending', 'On Hold'] : ['In Progress', 'Not Started'];
-                // For Freshservice, 'Blocked' is often represented by a high-priority, open ticket or a specific status.
+                
                 const highPriorityOpenStatuses = this.currentSource === 'freshservice' 
                     ? this.filteredData.filter(d => d.Status === 'Open' && d.Priority === 'High') 
                     : [];
@@ -715,7 +721,6 @@
                 };
             }
 
-            // Dynamic Engineer Stats Calculation (FIXED)
             getEngineerStats() {
                 const stats = {};
                 const engineerField = this.currentSource === 'freshservice' ? 'Agent Name' : 'Engineer';
@@ -747,7 +752,7 @@
                 const source = this.currentSource;
                 
                 if (source === 'freshservice') {
-                    // Use the exact columns from the doc
+                    // Export all required Freshservice columns
                     headers = ['ID', 'Type', 'Status', 'Priority', 'Subject', 'Description', 'Requester Name', 'Requester Email', 'Created Date', 'Location', 'Urgency', 'Impact', 'Issue Category', 'Source', 'Resolved Date', 'Closed Date', 'Function', 'Survey Score', 'Maximum Survey Score', 'Agent Name'];
                     rows = this.filteredData.map(item => headers.map(header => item[header] || '-'));
                 } else { // tracker
@@ -785,7 +790,6 @@
                 document.getElementById('engineerFilters').innerHTML = engineerHTML;
 
                 const statusHTML = (this.metadata.statuses || []).map(status => {
-                    // Normalize status names for CSS class generation
                     const cssClass = status.toLowerCase().replace(/\s+/g, '-');
                     return `
                         <button class="filter-chip ${this.filters.statuses.includes(status) ? 'active' : ''}" onclick="dashboard.toggleStatusFilter('${status}')">
@@ -803,7 +807,6 @@
             renderStats() {
                 const metrics = this.getMetrics();
                 
-                // Dynamic Labels (FIXED)
                 const completedLabel = this.currentSource === 'tracker' ? 'Completed Tasks' : 'Resolved/Closed';
                 const inProgressLabel = this.currentSource === 'tracker' ? 'In Progress' : 'Open / Pending';
                 const blockedLabel = this.currentSource === 'tracker' ? 'Blocked' : 'High Priority Open';
@@ -827,7 +830,7 @@
                     </div>
                     <div class="stat-card">
                         <div class="stat-number" style="color: var(--primary-color);">${metrics.completionRate}%</div>
-                        <div class="stat-label">Completion Rate</div>
+                        <div class="stat-label">Completion Rate (Resolved)</div>
                     </div>
                 `;
                 document.getElementById('statsGrid').innerHTML = statsHTML;
@@ -868,7 +871,6 @@
                 let tableHTML;
                 
                 if (this.currentSource === 'freshservice') {
-                    // Freshservice Table Structure (FIXED)
                     tableHTML = `
                         <table>
                             <thead>
@@ -896,7 +898,6 @@
                         </table>
                     `;
                 } else { // tracker
-                    // Tracker Table Structure
                     tableHTML = `
                         <table>
                             <thead>
