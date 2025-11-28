@@ -7,169 +7,177 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <style>
-        /* LEADERSHIP-GRADE DARK THEME: HIGH CONTRAST & VIBRANT */
+        /* EXECUTIVE CLASSY DARK MODE */
 
         :root {
             --primary-color: #5e72e4;   /* Deep Action Blue */
-            --accent-cyan: #00FFFF;     /* Vibrant Highlight Cyan */
-            --accent-green: #34D399;    /* Bright Success Green */
-            --dark-background: #000000; /* True Black Background */
-            --mid-background: #0A0A0A;  /* Darker Surface */
-            --light-surface: #1A1A1A;   /* Card Background */
-            --text-light: #F0F0F0;      /* Bright White Text */
-            --text-muted: #808080;      /* Muted Gray Text */
+            --accent-gold: #FFC300;     /* Elegant Amber/Gold Accent */
+            --accent-green: #00BFA5;    /* Sophisticated Teal Green for Success */
+            --dark-background: #0B0B0F; /* Rich Charcoal Black */
+            --mid-background: #15151A;  /* Mid-level Surface */
+            --light-surface: #202025;   /* Card Background */
+            --text-light: #E0E0E0;      /* Near White Text */
+            --text-muted: #8A8A99;      /* Muted Corporate Gray */
             --card-border: 1px solid rgba(255, 255, 255, 0.1);
-            --card-shadow: 0 8px 25px rgba(0, 255, 255, 0.05); /* Cyan glow effect */
+            --card-shadow: 0 4px 15px rgba(0, 0, 0, 0.5), 0 0 5px rgba(255, 195, 0, 0.05) inset;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', sans-serif;
             background: var(--dark-background);
             color: var(--text-light);
-            /* Subtle background pattern for texture */
-            background-image: radial-gradient(var(--mid-background) 1px, transparent 0), radial-gradient(var(--mid-background) 1px, transparent 0);
-            background-size: 30px 30px;
-            background-position: 0 0, 15px 15px;
+            /* Minimal subtle texture */
+            background-image: radial-gradient(var(--mid-background) 0.5px, transparent 0), radial-gradient(var(--mid-background) 0.5px, transparent 0);
+            background-size: 20px 20px;
+            background-position: 0 0, 10px 10px;
         }
 
-        /* Navigation - Floating Bar */
+        /* Navigation */
         .nav-bar {
-            background: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(15px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.15);
-            position: sticky;
-            top: 0;
-            z-index: 100;
+            background: rgba(11, 11, 15, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .logo {
-            font-size: 1.5rem;
-            font-weight: 700;
-            letter-spacing: -0.5px;
-            color: var(--accent-cyan);
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: var(--accent-gold);
+            letter-spacing: -0.8px;
         }
 
         /* Hero Section */
         .hero-section {
-            background: radial-gradient(circle at center, rgba(94, 114, 228, 0.1) 0%, rgba(0, 0, 0, 0) 70%);
-            padding: 4rem 2rem 2rem;
+            background: linear-gradient(180deg, rgba(255, 195, 0, 0.05) 0%, rgba(0, 0, 0, 0) 100%);
+            padding: 5rem 2rem 2.5rem;
         }
 
         .hero-title {
-            font-size: 4rem;
+            font-size: 4.5rem;
             font-weight: 900;
-            letter-spacing: -2px;
-            background: linear-gradient(90deg, var(--accent-cyan) 0%, var(--text-light) 100%);
+            letter-spacing: -2.5px;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(90deg, var(--text-light) 0%, var(--accent-gold) 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
 
         .hero-subtitle {
-            font-size: 1.4rem;
+            font-size: 1.35rem;
             color: var(--text-muted);
-            font-weight: 500;
+            margin-bottom: 1.5rem;
+        }
+        
+        /* Toggle Switch */
+        .toggle-switch-container {
+            background: var(--light-surface);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+            padding: 0.25rem;
+        }
+        .toggle-btn {
+            font-weight: 600;
+            color: var(--text-light);
         }
 
-        /* Filters */
+        /* Filter Bar */
         .filter-section {
+            padding: 2rem 0;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .filter-input {
-            border: var(--card-border);
-            background: var(--light-surface);
-        }
-        .filter-input:focus {
-            border-color: var(--accent-cyan);
-            box-shadow: 0 0 0 3px rgba(0, 255, 255, 0.2);
+            /* These hidden inputs are still defined in HTML but hidden by JS below */
+            display: none; 
         }
 
         .filter-chip {
-            background: var(--mid-background);
+            background: var(--light-surface);
             border: var(--card-border);
+            font-weight: 600;
         }
 
         .filter-chip:hover {
-            border-color: var(--accent-cyan);
-            background: rgba(0, 255, 255, 0.1);
+            border-color: var(--accent-gold);
+            background: var(--mid-background);
         }
 
         .filter-chip.active {
             background: var(--primary-color);
             border-color: var(--primary-color);
             color: white;
-            font-weight: 600;
+            box-shadow: 0 4px 10px rgba(94, 114, 228, 0.4);
         }
         
         .date-display {
-            background: var(--mid-background);
-            color: var(--text-muted);
+            /* Now acting as a prominent selectable chip */
+            background: var(--accent-gold); 
+            color: #333;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid var(--accent-gold);
+            padding: 0.75rem 1.5rem;
+        }
+        .date-display:hover {
+            background: #FFD45A;
         }
 
         .clear-btn {
             background: var(--light-surface);
             border: var(--card-border);
-        }
-
-        .clear-btn:hover {
-            background: var(--mid-background);
-            border-color: var(--accent-cyan);
+            font-weight: 600;
+            color: var(--text-light);
         }
         
         #exportBtn {
             background: var(--accent-green) !important;
             border-color: var(--accent-green) !important;
         }
-        
-        /* Toggle Switch */
-        .toggle-switch-container {
-            background: var(--mid-background);
-            border: var(--card-border);
-        }
-        .toggle-btn {
-            color: var(--text-light);
-        }
 
-        /* Stats Section */
+        /* Stats Cards */
         .stat-card {
             background: var(--light-surface);
-            border: var(--card-border);
+            border: 1px solid var(--mid-background);
+            border-top: 3px solid var(--accent-gold); /* Gold highlight border */
+            border-radius: 0.75rem;
             box-shadow: var(--card-shadow);
         }
 
         .stat-card:hover {
-            transform: translateY(-4px);
-            border-color: var(--accent-cyan);
-            box-shadow: 0 10px 30px rgba(0, 255, 255, 0.15);
+            transform: translateY(-5px);
+            border-color: rgba(255, 195, 0, 0.5);
+            box-shadow: 0 15px 35px rgba(255, 195, 0, 0.15);
         }
 
         .stat-number {
-            font-size: 3rem;
-            font-weight: 800;
-            color: var(--accent-cyan); /* Use vibrant cyan for numbers */
+            font-size: 3.2rem;
+            font-weight: 900;
+            color: var(--accent-gold);
         }
 
         .stat-label {
             color: var(--text-muted);
-            letter-spacing: 0.8px;
-            font-size: 0.9rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
         }
-
-        /* Cards & Progress */
+        
+        /* Engineer Cards */
         .card {
             background: var(--light-surface);
             border: var(--card-border);
             box-shadow: var(--card-shadow);
         }
         .card:hover {
-            border-color: var(--accent-cyan);
-            box-shadow: 0 15px 30px rgba(0, 255, 255, 0.1);
+            border-color: var(--primary-color);
+            box-shadow: 0 10px 30px rgba(94, 114, 228, 0.1);
         }
 
         .card-title {
-            color: var(--accent-cyan);
+            color: var(--accent-gold);
+            font-weight: 700;
         }
         
         .progress-bar {
@@ -177,11 +185,11 @@
         }
 
         .progress-fill {
-            background: linear-gradient(90deg, var(--primary-color) 0%, var(--accent-cyan) 100%);
+            background: linear-gradient(90deg, var(--primary-color) 0%, var(--accent-gold) 100%);
         }
 
         .progress-label span:last-child {
-            color: var(--accent-cyan);
+            color: var(--accent-gold);
         }
         
         /* Table */
@@ -193,37 +201,26 @@
         th {
             background: var(--mid-background);
             color: var(--text-muted);
-        }
-        td {
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            font-size: 0.9rem;
+            letter-spacing: 0.8px;
         }
         tr:hover {
-            background: rgba(94, 114, 228, 0.05); /* Subtle blue highlight on hover */
+            background: rgba(255, 195, 0, 0.05); /* Subtle amber hover */
         }
         
         /* Badges */
         .badge-completed, .badge-resolved, .badge-closed { background: var(--accent-green); }
         .badge-in-progress, .badge-open, .badge-pending { background: var(--primary-color); }
         .badge-blocked { background: #FF4136; color: white; }
-        .badge-on-hold { background: #FFDC00; color: #333; } /* Yellow on dark background */
-
-        /* Modal */
-        .modal {
-            background: var(--mid-background);
-            border: var(--card-border);
-        }
-        .modal-input {
-            background-color: var(--dark-background);
-            border-color: rgba(255, 255, 255, 0.1);
-        }
+        .badge-on-hold { background: var(--accent-gold); color: #333; font-weight: 700; } 
     </style>
 </head>
 <body>
     <div class="nav-bar">
         <div class="nav-content">
-            <div class="logo">📊 EXECUTIVE COMMAND</div>
+            <div class="logo">🎯 EXECUTIVE COMMAND</div>
             <div class="nav-actions">
-                <button id="refreshBtn" class="toggle-btn" style="background: var(--light-surface); color: var(--text-light);" onmouseover="this.style.background='#0A0A0A'" onmouseout="this.style.background='#1A1A1A'">🔄 Refresh</button>
+                <button id="refreshBtn" class="toggle-btn" style="background: var(--light-surface); color: var(--text-light);" onmouseover="this.style.background='var(--mid-background)'" onmouseout="this.style.background='var(--light-surface)'">🔄 Refresh</button>
                 <div style="font-size: 0.875rem; color: var(--text-muted);">Last updated: <span id="lastUpdate">now</span></div>
             </div>
         </div>
@@ -246,7 +243,9 @@
             <div class="filter-bar">
                 <input type="date" id="startDate" class="filter-input" placeholder="Start Date">
                 <input type="date" id="endDate" class="filter-input" placeholder="End Date">
-                <div class="date-display" id="dateDisplay">Select date range</div>
+                
+                <button class="date-display" id="dateDisplay" onclick="dashboard.openDateModal()">Select Date Range</button>
+                
                 <button class="clear-btn" onclick="dashboard.clearAllFilters()">Clear Filters</button>
                 <button class="clear-btn" id="exportBtn">📥 Export</button>
             </div>
@@ -293,10 +292,10 @@
 
     <script>
         const CONFIG = {
-            APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbz1jIz73VKcat6GmkqovmqtXHyago4bimxxeaVWekniYU_lowq-e4t9FV1r2PSUqziIKw/exec', // Replace with your actual URL
-            API_KEY: '98415623-a1d1-4045-84d3-c3e67fa687af',        // Replace with your actual Key
+            APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbz1jIz73VKcat6GmkqovmqtXHyago4bimxxeaVWekniYU_lowq-e4t9FV1r2PSUqziIKw/exec', 
+            API_KEY: '98415623-a1d1-4045-84d3-c3e67fa687af',        
             REFRESH_INTERVAL: 300000,
-            ENABLE_DEMO: true, // Keep TRUE for testing this fix
+            ENABLE_DEMO: false, 
             ORG_NAME: 'Your Organization'
         };
 
@@ -328,25 +327,29 @@
                     statuses: [],
                     dateRange: { start: '', end: '' }
                 };
-                this.currentSource = 'tracker'; // Default to 'tracker'
+                this.currentSource = 'tracker'; 
                 this.init();
             }
 
             async init() {
                 // Initialize the UI, set default toggle state, and start the initial load
                 await this.switchDataSource(this.currentSource, false); 
-                // Note: switchDataSource calls loadData and render on initial load, 
-                // but the periodic interval is needed for subsequent refreshes.
+                this.render();
                 setInterval(() => this.loadData(), CONFIG.REFRESH_INTERVAL);
             }
 
-            // Logic to switch data source and update UI (FIXED)
+            // Fix: Added method to open modal, used by the dateDisplay button
+            openDateModal() {
+                document.getElementById('modalStart').value = this.filters.dateRange.start;
+                document.getElementById('modalEnd').value = this.filters.dateRange.end;
+                document.getElementById('dateModal').classList.add('active');
+            }
+
             async switchDataSource(source, reload = true) {
                 this.currentSource = source;
                 
-                // Use explicit colors to fix CSS variable reading in inline JS
                 const primaryColor = '#5e72e4';
-                const textColor = '#F0F0F0';
+                const textColor = '#E0E0E0';
 
                 const trackerBtn = document.getElementById('trackerToggle');
                 const fsBtn = document.getElementById('freshserviceToggle');
@@ -367,9 +370,8 @@
                     this.filters = { engineers: [], statuses: [], dateRange: { start: '', end: '' } };
                     document.getElementById('startDate').value = '';
                     document.getElementById('endDate').value = '';
-                    document.getElementById('dateDisplay').textContent = 'Select date range';
+                    document.getElementById('dateDisplay').textContent = 'Select Date Range';
                     
-                    // Trigger data reload for the new source (CRITICAL FIX)
                     await this.loadData();
                 }
             }
@@ -379,7 +381,7 @@
                     if (CONFIG.ENABLE_DEMO) {
                         this.data = this.currentSource === 'tracker' ? DEMO_DATA_TRACKER : DEMO_DATA_FRESHSERVICE;
                         
-                        // Use the correct field dynamically for metadata extraction (FIXED)
+                        // Use the correct field dynamically for metadata extraction (FIXED: Ensure Agent Name is correctly mapped)
                         const engineerField = this.currentSource === 'freshservice' ? 'Agent Name' : 'Engineer';
                         
                         const engineerList = this.data.map(d => d[engineerField]).filter(Boolean);
@@ -424,7 +426,6 @@
                 const dateField = this.currentSource === 'freshservice' ? 'Created Date' : 'Start Date';
 
                 if (this.filters.engineers.length > 0) {
-                    // Filtering on the correct field (Engineer or Agent Name)
                     filtered = filtered.filter(item => this.filters.engineers.includes(item[engineerField]));
                 }
 
@@ -471,7 +472,7 @@
                 this.filters = { engineers: [], statuses: [], dateRange: { start: '', end: '' } };
                 document.getElementById('startDate').value = '';
                 document.getElementById('endDate').value = '';
-                document.getElementById('dateDisplay').textContent = 'Select date range';
+                document.getElementById('dateDisplay').textContent = 'Select Date Range';
                 this.applyFilters();
                 this.render();
             }
@@ -494,7 +495,18 @@
                 const start = this.filters.dateRange.start;
                 const end = this.filters.dateRange.end;
                 if (start && end) {
-                    document.getElementById('dateDisplay').textContent = `${start} to ${end}`;
+                    // Formats date nicely for display, removing year if redundant but keeping YYYY-MM-DD format for consistency
+                    const format = (dateStr) => {
+                        try {
+                            const date = new Date(dateStr);
+                            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                        } catch {
+                            return dateStr;
+                        }
+                    };
+                    document.getElementById('dateDisplay').textContent = `${format(start)} to ${format(end)}`;
+                } else {
+                     document.getElementById('dateDisplay').textContent = 'Select Date Range';
                 }
             }
 
@@ -554,7 +566,6 @@
                 const source = this.currentSource;
                 
                 if (source === 'freshservice') {
-                    // Export all required Freshservice columns
                     headers = ['ID', 'Type', 'Status', 'Priority', 'Subject', 'Description', 'Requester Name', 'Requester Email', 'Created Date', 'Location', 'Urgency', 'Impact', 'Issue Category', 'Source', 'Resolved Date', 'Closed Date', 'Function', 'Survey Score', 'Maximum Survey Score', 'Agent Name'];
                     rows = this.filteredData.map(item => headers.map(header => item[header] || '-'));
                 } else { // tracker
@@ -601,9 +612,8 @@
                 }).join('');
                 document.getElementById('statusFilters').innerHTML = statusHTML;
 
-                if (this.filters.dateRange.start && this.filters.dateRange.end) {
-                    document.getElementById('dateDisplay').textContent = `${this.filters.dateRange.start} to ${this.filters.dateRange.end}`;
-                }
+                // Call updateDateDisplay to show the current range/default text
+                this.updateDateDisplay();
             }
 
             renderStats() {
@@ -631,7 +641,7 @@
                         <div class="stat-label">${blockedLabel}</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-number" style="color: var(--accent-cyan);">${metrics.completionRate}%</div>
+                        <div class="stat-number" style="color: var(--accent-gold);">${metrics.completionRate}%</div>
                         <div class="stat-label">Completion Rate (Resolved)</div>
                     </div>
                 `;
@@ -651,7 +661,7 @@
                         </div>
                         <div class="progress-label">
                             <span>${eng.rate}% Complete</span>
-                            <span style="color: var(--accent-cyan); font-weight: 600;">${eng.completed}/${eng.total}</span>
+                            <span style="color: var(--accent-gold); font-weight: 600;">${eng.completed}/${eng.total}</span>
                         </div>
                     </div>
                 `).join('');
@@ -662,7 +672,7 @@
                 if (this.filteredData.length === 0) {
                     document.getElementById('tableContent').innerHTML = `
                         <div class="empty-state">
-                            <div class="empty-state-icon">📭</div>
+                            <div class="empty-state-icon" style="color: var(--accent-gold);">📭</div>
                             <div class="empty-state-title" style="color: var(--text-light);">No Items Found</div>
                             <p style="color: var(--text-muted);">Try adjusting your filters or switching the data source.</p>
                         </div>
@@ -738,6 +748,8 @@
         window.addEventListener('DOMContentLoaded', () => {
             document.getElementById('refreshBtn').addEventListener('click', () => dashboard.loadData());
             document.getElementById('exportBtn').addEventListener('click', () => dashboard.exportCSV());
+            
+            // The two hidden inputs are only used to store the values from the modal
             document.getElementById('startDate').addEventListener('change', (e) => {
                 dashboard.filters.dateRange.start = e.target.value;
                 dashboard.updateDateDisplay();
