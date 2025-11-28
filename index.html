@@ -3,39 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IT Team Dashboard</title>
+    <title>Team Tracker Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <style>
-        /* MOENGAGE-INSPIRED STYLES */
-
-        :root {
-            --primary-color: #5e72e4; /* Vibrant Blue/Purple */
-            --dark-background: #0f172a; /* Deep Slate Blue */
-            --light-surface: #ffffff;
-            --text-light: #f1f5f9;
-            --text-muted: #94a3b8;
-            --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(255, 255, 255, 0.05) inset;
-        }
-
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', sans-serif;
-            background: var(--dark-background);
-            color: var(--text-light);
-            /* Stylized Background Pattern (MoEngage-like geometric/grid effect) */
-            background-image: radial-gradient(var(--text-muted) 1px, transparent 0), radial-gradient(var(--text-muted) 1px, transparent 0);
-            background-size: 40px 40px;
-            background-position: 0 0, 20px 20px;
-            background-blend-mode: multiply;
+            background: #f5f5f7;
+            color: #1d1d1f;
         }
 
-        /* Navigation - Bright on Dark */
+        /* Apple-style Navigation */
         .nav-bar {
-            background: rgba(255, 255, 255, 0.1); /* Slightly transparent background */
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
             position: sticky;
             top: 0;
             z-index: 100;
@@ -52,9 +36,8 @@
 
         .logo {
             font-size: 1.5rem;
-            font-weight: 700;
+            font-weight: 600;
             letter-spacing: -0.5px;
-            color: var(--primary-color);
         }
 
         .nav-actions {
@@ -63,28 +46,30 @@
             align-items: center;
         }
 
-        /* Hero Section - Elevated */
+        /* Hero Section */
         .hero-section {
-            background: var(--dark-background);
+            background: linear-gradient(180deg, #f5f5f7 0%, #ffffff 100%);
             padding: 4rem 2rem;
             text-align: center;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .hero-content {
+            max-width: 900px;
+            margin: 0 auto;
         }
 
         .hero-title {
-            font-size: 3.8rem;
-            font-weight: 800;
-            letter-spacing: -1.5px;
+            font-size: 3.5rem;
+            font-weight: 700;
+            letter-spacing: -1px;
             margin-bottom: 1rem;
             line-height: 1.1;
-            background: linear-gradient(90deg, #c3cbe3 0%, #ffffff 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
         }
 
         .hero-subtitle {
-            font-size: 1.35rem;
-            color: var(--text-muted);
+            font-size: 1.25rem;
+            color: #666;
             margin-bottom: 2rem;
             font-weight: 500;
         }
@@ -96,10 +81,10 @@
             padding: 0 2rem;
         }
 
-        /* Filter Bar - Modern Dark */
+        /* Filter Bar - Apple Style */
         .filter-section {
             padding: 2rem 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
         }
 
         .filter-bar {
@@ -112,37 +97,31 @@
 
         .filter-input {
             padding: 0.75rem 1.25rem;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(0, 0, 0, 0.15);
             border-radius: 0.5rem;
-            background: rgba(255, 255, 255, 0.05); /* Slightly transparent dark input */
-            color: var(--text-light);
+            background: white;
             font-size: 0.9375rem;
             transition: all 0.2s;
             font-family: inherit;
             cursor: pointer;
         }
-        /* Style date picker text color */
-        .filter-input::-webkit-calendar-picker-indicator {
-            filter: invert(1);
-        }
 
         .filter-input:hover {
-            border-color: var(--primary-color);
-            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(0, 0, 0, 0.3);
+            background: #f9f9f9;
         }
 
         .filter-input:focus {
             outline: none;
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(94, 114, 228, 0.3);
+            border-color: #0071e3;
+            box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.1);
         }
 
         .filter-chip {
             display: inline-block;
             padding: 0.6rem 1.2rem;
-            background: rgba(255, 255, 255, 0.05);
-            color: var(--text-light);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: white;
+            border: 1px solid rgba(0, 0, 0, 0.15);
             border-radius: 50px;
             font-size: 0.875rem;
             font-weight: 500;
@@ -152,30 +131,29 @@
         }
 
         .filter-chip:hover {
-            border-color: var(--primary-color);
-            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(0, 0, 0, 0.3);
+            background: #f9f9f9;
         }
 
         .filter-chip.active {
-            background: var(--primary-color);
-            color: var(--light-surface);
-            border-color: var(--primary-color);
+            background: #0071e3;
+            color: white;
+            border-color: #0071e3;
         }
 
         .date-display {
             padding: 0.75rem 1.25rem;
-            background: rgba(255, 255, 255, 0.05);
+            background: #f5f5f7;
             border-radius: 0.5rem;
             font-size: 0.875rem;
             font-weight: 500;
-            color: var(--text-muted);
+            color: #666;
         }
 
         .clear-btn {
             padding: 0.75rem 1.5rem;
-            background: rgba(255, 255, 255, 0.05);
-            color: var(--text-light);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: white;
+            border: 1px solid rgba(0, 0, 0, 0.15);
             border-radius: 0.5rem;
             font-size: 0.875rem;
             font-weight: 500;
@@ -185,21 +163,14 @@
         }
 
         .clear-btn:hover {
-            background: rgba(255, 255, 255, 0.15);
-            border-color: var(--primary-color);
-        }
-        
-        /* Specific button for Export */
-        #exportBtn {
-            background: var(--primary-color) !important;
-            color: white !important;
-            border-color: var(--primary-color) !important;
+            background: #f5f5f7;
+            border-color: rgba(0, 0, 0, 0.3);
         }
 
         /* Stats Section */
         .stats-section {
             padding: 3rem 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
         }
 
         .stats-grid {
@@ -211,32 +182,28 @@
         .stat-card {
             text-align: center;
             padding: 2rem;
-            background: var(--light-surface);
-            color: var(--dark-background); /* Dark text on light card */
+            background: white;
             border-radius: 1rem;
-            border: 1px solid rgba(0, 0, 0, 0.05);
-            box-shadow: var(--card-shadow);
+            border: 1px solid rgba(0, 0, 0, 0.1);
             transition: all 0.3s;
         }
 
         .stat-card:hover {
-            transform: translateY(-4px) scale(1.02);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+            border-color: rgba(0, 0, 0, 0.2);
+            transform: translateY(-2px);
         }
 
         .stat-number {
-            font-size: 2.8rem;
+            font-size: 2.5rem;
             font-weight: 700;
-            color: var(--primary-color);
+            color: #0071e3;
             margin-bottom: 0.5rem;
         }
 
         .stat-label {
-            font-size: 1rem;
-            color: #64748b; /* Muted dark color */
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+            font-size: 0.9375rem;
+            color: #666;
+            font-weight: 500;
         }
 
         /* Cards Section */
@@ -246,7 +213,7 @@
 
         .section-title {
             font-size: 2rem;
-            font-weight: 700;
+            font-weight: 600;
             margin-bottom: 2rem;
             letter-spacing: -0.5px;
         }
@@ -259,73 +226,86 @@
         }
 
         .card {
-            background: var(--light-surface);
-            color: var(--dark-background);
-            border: 1px solid rgba(0, 0, 0, 0.05);
+            background: white;
+            border: 1px solid rgba(0, 0, 0, 0.1);
             border-radius: 1rem;
             padding: 1.5rem;
-            box-shadow: var(--card-shadow);
             transition: all 0.3s;
             cursor: pointer;
         }
 
         .card:hover {
+            border-color: rgba(0, 0, 0, 0.2);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
             transform: translateY(-4px);
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
         }
 
         .card-title {
-            font-size: 1.25rem;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
         }
 
         .card-subtitle {
-            font-size: 0.9375rem;
-            color: #64748b;
-            margin-bottom: 1.25rem;
+            font-size: 0.875rem;
+            color: #666;
+            margin-bottom: 1.5rem;
         }
 
         .progress-bar {
             width: 100%;
-            height: 8px;
-            background: #e2e8f0;
-            border-radius: 4px;
+            height: 6px;
+            background: #e5e5ea;
+            border-radius: 3px;
             overflow: hidden;
             margin-bottom: 0.75rem;
         }
 
         .progress-fill {
             height: 100%;
-            background: linear-gradient(90deg, var(--primary-color) 0%, #7f8cfc 100%);
+            background: linear-gradient(90deg, #0071e3 0%, #0050c0 100%);
             transition: width 0.5s ease;
-            border-radius: 4px;
+            border-radius: 3px;
         }
 
         .progress-label {
-            font-size: 0.875rem;
-            color: #64748b;
+            font-size: 0.8125rem;
+            color: #666;
             display: flex;
             justify-content: space-between;
-            font-weight: 500;
         }
 
-        /* Badge Colors */
+        /* Badge */
         .badge {
             display: inline-block;
             padding: 0.35rem 0.75rem;
             border-radius: 50px;
             font-size: 0.75rem;
-            font-weight: 700;
+            font-weight: 600;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 0;
+            letter-spacing: 0.4px;
+            margin-bottom: 1rem;
         }
 
-        .badge-completed { background: #10b981; color: white; } /* Emerald Green */
-        .badge-in-progress { background: var(--primary-color); color: white; }
-        .badge-blocked { background: #ef4444; color: white; } /* Strong Red */
-        .badge-not-started { background: #94a3b8; color: white; } /* Muted Gray */
+        .badge-completed {
+            background: #34c759;
+            color: white;
+        }
+
+        .badge-in-progress {
+            background: #0071e3;
+            color: white;
+        }
+
+        .badge-blocked {
+            background: #ff3b30;
+            color: white;
+        }
+
+        .badge-not-started {
+            background: #a2a2a7;
+            color: white;
+        }
 
         /* Table Section */
         .table-section {
@@ -333,39 +313,37 @@
         }
 
         .table-wrapper {
-            background: var(--light-surface);
-            border: 1px solid rgba(0, 0, 0, 0.05);
+            background: white;
+            border: 1px solid rgba(0, 0, 0, 0.1);
             border-radius: 1rem;
             overflow: hidden;
-            box-shadow: var(--card-shadow);
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
-            color: var(--dark-background);
         }
 
         th {
-            background: #f1f5f9;
+            background: #f5f5f7;
             padding: 1.25rem;
             text-align: left;
-            font-weight: 700;
+            font-weight: 600;
             font-size: 0.875rem;
-            color: #475569;
-            border-bottom: 1px solid #e2e8f0;
+            color: #666;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.3px;
         }
 
         td {
             padding: 1.25rem;
-            border-bottom: 1px solid #f1f5f9;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.06);
             font-size: 0.9375rem;
         }
 
         tr:hover {
-            background: #f8fafc;
+            background: #f9f9f9;
         }
 
         tr:last-child td {
@@ -376,130 +354,174 @@
         .empty-state {
             text-align: center;
             padding: 3rem 2rem;
-            color: #64748b;
+            color: #666;
+        }
+
+        .empty-state-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
         }
 
         .empty-state-title {
-            color: var(--dark-background);
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #1d1d1f;
+            margin-bottom: 0.5rem;
         }
 
         /* Modal */
         .modal-overlay {
-            /* Keep original styles for dark overlay/blur */
             display: none;
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0, 0, 0, 0.6);
-            backdrop-filter: blur(8px);
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(10px);
             z-index: 1000;
             align-items: center;
             justify-content: center;
         }
 
+        .modal-overlay.active {
+            display: flex;
+        }
+
         .modal {
-            background: var(--light-surface);
-            color: var(--dark-background);
+            background: white;
             border-radius: 1.5rem;
             padding: 2rem;
             max-width: 500px;
             width: 90%;
             max-height: 80vh;
             overflow-y: auto;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
         }
-        
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+
         .modal-input {
             width: 100%;
             padding: 0.75rem 1rem;
-            border: 1px solid #e2e8f0;
+            border: 1px solid rgba(0, 0, 0, 0.15);
             border-radius: 0.5rem;
             margin-bottom: 1rem;
             font-size: 0.9375rem;
             font-family: inherit;
-            color: var(--dark-background);
-            background-color: #f8fafc;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
         }
 
         .btn-primary {
-            background: var(--primary-color);
+            flex: 1;
+            padding: 0.75rem 1.5rem;
+            background: #0071e3;
             color: white;
             border: none;
-            /* ... other styles */
+            border-radius: 0.5rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
         }
 
         .btn-primary:hover {
-            background: #4c5ee5; /* Slightly darker primary color */
+            background: #0050c0;
         }
 
         .btn-secondary {
-            background: #e2e8f0;
-            color: var(--dark-background);
+            flex: 1;
+            padding: 0.75rem 1.5rem;
+            background: #f5f5f7;
+            color: #1d1d1f;
             border: none;
-            /* ... other styles */
+            border-radius: 0.5rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
         }
 
         .btn-secondary:hover {
-            background: #cbd5e1;
+            background: #e8e8ed;
         }
-        
-        /* Spinners - ensure visibility on dark background */
+
         .spinner {
-            border: 2px solid rgba(255, 255, 255, 0.2);
-            border-top-color: var(--primary-color);
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(0, 113, 227, 0.2);
+            border-top-color: #0071e3;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
         }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
+    <!-- Navigation -->
     <div class="nav-bar">
         <div class="nav-content">
-            <div class="logo">💻⚙️ Moengage IT </div>
+            <div class="logo">📊 Team Tracker</div>
             <div class="nav-actions">
-                <button id="refreshBtn" style="padding: 0.5rem 1rem; background: rgba(255, 255, 255, 0.1); color: var(--text-light); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 0.5rem; cursor: pointer; font-weight: 500; transition: all 0.2s;" onmouseover="this.style.background='rgba(255, 255, 255, 0.2)'" onmouseout="this.style.background='rgba(255, 255, 255, 0.1)'">🔄 Refresh</button>
-                <div style="font-size: 0.875rem; color: var(--text-muted);">Last updated: <span id="lastUpdate">now</span></div>
+                <button id="refreshBtn" style="padding: 0.5rem 1rem; background: #f5f5f7; border: none; border-radius: 0.5rem; cursor: pointer; font-weight: 500; transition: all 0.2s;" onmouseover="this.style.background='#e8e8ed'" onmouseout="this.style.background='#f5f5f7'">🔄 Refresh</button>
+                <div style="font-size: 0.875rem; color: #666;">Last updated: <span id="lastUpdate">now</span></div>
             </div>
         </div>
     </div>
 
+    <!-- Hero Section -->
     <div class="hero-section">
         <div class="hero-content">
-            <h1 class="hero-title">IT Team Dashboard</h1>
-            <p class="hero-subtitle">Real-time insights into team's progress and productivity </p>
+            <h1 class="hero-title">Team Performance Dashboard</h1>
+            <p class="hero-subtitle">Real-time insights into your team's progress and productivity</p>
         </div>
     </div>
 
+    <!-- Main Content -->
     <div class="main-container">
+        <!-- Filters Section -->
         <div class="filter-section">
             <div class="filter-bar">
                 <input type="date" id="startDate" class="filter-input" placeholder="Start Date">
                 <input type="date" id="endDate" class="filter-input" placeholder="End Date">
                 <div class="date-display" id="dateDisplay">Select date range</div>
                 <button class="clear-btn" onclick="dashboard.clearAllFilters()">Clear Filters</button>
-                <button class="clear-btn" id="exportBtn" style="margin-left: 0.5rem;">📥 Export</button>
+                <button class="clear-btn" id="exportBtn" style="margin-left: 0.5rem; background: #0071e3; color: white; border-color: #0071e3;">📥 Export</button>
             </div>
 
+            <!-- Engineer Filters -->
             <div style="margin-bottom: 1.5rem;">
-                <div style="font-size: 0.875rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px;">Engineers</div>
+                <div style="font-size: 0.875rem; font-weight: 600; color: #666; margin-bottom: 0.75rem; text-transform: uppercase; letter-spacing: 0.3px;">Engineers</div>
                 <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;" id="engineerFilters"></div>
             </div>
 
+            <!-- Status Filters -->
             <div>
-                <div style="font-size: 0.875rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px;">Status</div>
+                <div style="font-size: 0.875rem; font-weight: 600; color: #666; margin-bottom: 0.75rem; text-transform: uppercase; letter-spacing: 0.3px;">Status</div>
                 <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;" id="statusFilters"></div>
             </div>
         </div>
 
+        <!-- Stats Section -->
         <div class="stats-section">
             <div class="stats-grid" id="statsGrid"></div>
         </div>
 
+        <!-- Engineer Performance Cards -->
         <div class="cards-section">
             <h2 class="section-title">Engineer Performance</h2>
             <div class="cards-grid" id="engineerCards"></div>
         </div>
 
+        <!-- Data Table -->
         <div class="table-section">
             <h2 class="section-title">Team Activity</h2>
             <div class="table-wrapper">
@@ -508,6 +530,7 @@
         </div>
     </div>
 
+    <!-- Modal for Date Range -->
     <div class="modal-overlay" id="dateModal">
         <div class="modal">
             <div class="modal-title">Select Date Range</div>
@@ -521,12 +544,11 @@
     </div>
 
     <script>
-        // (JavaScript remains unchanged for functionality)
         const CONFIG = {
             APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbz1jIz73VKcat6GmkqovmqtXHyago4bimxxeaVWekniYU_lowq-e4t9FV1r2PSUqziIKw/exec',
             API_KEY: 'c5b7c1f7-36b5-4a65-8134-adab9feba0c7',
             REFRESH_INTERVAL: 300000,
-            ENABLE_DEMO: false, // Switched to true for demonstration
+            ENABLE_DEMO: false,
             ORG_NAME: 'Moengage'
         };
 
@@ -549,6 +571,7 @@
                     statuses: [],
                     dateRange: { start: '', end: '' }
                 };
+                this.currentSource = 'tracker'; // 'tracker' or 'freshservice'
                 this.init();
             }
 
@@ -556,6 +579,20 @@
                 await this.loadData();
                 this.render();
                 setInterval(() => this.loadData(), CONFIG.REFRESH_INTERVAL);
+            }
+
+            async switchDataSource(source) {
+                this.currentSource = source;
+                
+                // Update toggle button styles
+                document.getElementById('trackerToggle').style.background = source === 'tracker' ? 'var(--primary-color)' : 'transparent';
+                document.getElementById('trackerToggle').style.color = source === 'tracker' ? 'white' : 'var(--text-light)';
+                document.getElementById('freshserviceToggle').style.background = source === 'freshservice' ? 'var(--primary-color)' : 'transparent';
+                document.getElementById('freshserviceToggle').style.color = source === 'freshservice' ? 'white' : 'var(--text-light)';
+                
+                // Clear filters and reload data
+                this.clearAllFilters();
+                await this.loadData();
             }
 
             async loadData() {
@@ -573,8 +610,8 @@
                         }
 
                         const [dataRes, metaRes] = await Promise.all([
-                            fetch(`${CONFIG.APPS_SCRIPT_URL}?action=getData&key=${CONFIG.API_KEY}`),
-                            fetch(`${CONFIG.APPS_SCRIPT_URL}?action=getMetadata&key=${CONFIG.API_KEY}`)
+                            fetch(`${CONFIG.APPS_SCRIPT_URL}?action=getData&source=${this.currentSource}&key=${CONFIG.API_KEY}`),
+                            fetch(`${CONFIG.APPS_SCRIPT_URL}?action=getMetadata&source=${this.currentSource}&key=${CONFIG.API_KEY}`)
                         ]);
 
                         const data = await dataRes.json();
@@ -598,8 +635,12 @@
             applyFilters() {
                 let filtered = [...this.data];
 
+                // For Team Tracker - filter by Engineer
+                // For Freshservice - filter by Agent Name
+                const engineerField = this.currentSource === 'freshservice' ? 'Agent Name' : 'Engineer';
+
                 if (this.filters.engineers.length > 0) {
-                    filtered = filtered.filter(item => this.filters.engineers.includes(item.Engineer));
+                    filtered = filtered.filter(item => this.filters.engineers.includes(item[engineerField]));
                 }
 
                 if (this.filters.statuses.length > 0) {
@@ -609,8 +650,10 @@
                 if (this.filters.dateRange.start && this.filters.dateRange.end) {
                     const start = new Date(this.filters.dateRange.start);
                     const end = new Date(this.filters.dateRange.end);
+                    const dateField = this.currentSource === 'freshservice' ? 'Created Date' : 'Start Date';
+                    
                     filtered = filtered.filter(item => {
-                        const date = new Date(item['Start Date']);
+                        const date = new Date(item[dateField]);
                         return date >= start && date <= end;
                     });
                 }
@@ -688,14 +731,24 @@
 
             getEngineerStats() {
                 const stats = {};
+                const engineerField = this.currentSource === 'freshservice' ? 'Agent Name' : 'Engineer';
+                
                 this.filteredData.forEach(item => {
-                    if (!stats[item.Engineer]) {
-                        stats[item.Engineer] = { total: 0, completed: 0, inProgress: 0, blocked: 0 };
+                    const name = item[engineerField];
+                    if (!stats[name]) {
+                        stats[name] = { total: 0, completed: 0, inProgress: 0, blocked: 0 };
                     }
-                    stats[item.Engineer].total++;
-                    if (item.Status === 'Completed') stats[item.Engineer].completed++;
-                    if (item.Status === 'In Progress') stats[item.Engineer].inProgress++;
-                    if (item.Status === 'Blocked') stats[item.Engineer].blocked++;
+                    stats[name].total++;
+                    
+                    // Status mapping varies by source
+                    if (this.currentSource === 'freshservice') {
+                        if (item.Status === 'Closed' || item.Status === 'Resolved') stats[name].completed++;
+                        if (item.Status === 'Open' || item.Status === 'Pending') stats[name].inProgress++;
+                    } else {
+                        if (item.Status === 'Completed') stats[name].completed++;
+                        if (item.Status === 'In Progress') stats[name].inProgress++;
+                        if (item.Status === 'Blocked') stats[name].blocked++;
+                    }
                 });
 
                 return Object.entries(stats)
@@ -708,17 +761,27 @@
             }
 
             exportCSV() {
-                const headers = ['Task', 'Sub-Task', 'Engineer', 'Status', 'Start Date', 'Closure Date', 'Blocker/Dependency'];
-                const rows = this.filteredData.map(item => [
-                    item.Task, item['Sub-Task'], item.Engineer, item.Status,
-                    item['Start Date'], item['Closure Date'] || '-', item['Blocker/Dependency'] || '-'
-                ]);
+                let headers, rows;
+                
+                if (this.currentSource === 'freshservice') {
+                    headers = ['ID', 'Type', 'Status', 'Priority', 'Subject', 'Agent Name', 'Created Date', 'Resolved Date', 'Closed Date'];
+                    rows = this.filteredData.map(item => [
+                        item.ID, item.Type, item.Status, item.Priority, item.Subject,
+                        item['Agent Name'], item['Created Date'], item['Resolved Date'] || '-', item['Closed Date'] || '-'
+                    ]);
+                } else {
+                    headers = ['Task', 'Sub-Task', 'Engineer', 'Status', 'Start Date', 'Closure Date', 'Blocker/Dependency'];
+                    rows = this.filteredData.map(item => [
+                        item.Task, item['Sub-Task'], item.Engineer, item.Status,
+                        item['Start Date'], item['Closure Date'] || '-', item['Blocker/Dependency'] || '-'
+                    ]);
+                }
 
                 const csv = [headers, ...rows].map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
                 const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
                 const link = document.createElement('a');
                 link.href = URL.createObjectURL(blob);
-                link.download = `team-tracker-${new Date().toISOString().split('T')[0]}.csv`;
+                link.download = `${this.currentSource}-data-${new Date().toISOString().split('T')[0]}.csv`;
                 link.click();
             }
 
@@ -731,7 +794,10 @@
             }
 
             renderFilters() {
-                const engineerHTML = this.metadata.engineers.map(eng => `
+                const engineerField = this.currentSource === 'freshservice' ? 'agents' : 'engineers';
+                const engineerList = this.metadata[engineerField] || [];
+                
+                const engineerHTML = engineerList.map(eng => `
                     <button class="filter-chip ${this.filters.engineers.includes(eng) ? 'active' : ''}" onclick="dashboard.toggleEngineerFilter('${eng}')">
                         ${eng}
                     </button>
@@ -758,19 +824,19 @@
                         <div class="stat-label">Total Tasks</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-number" style="color: #10b981;">${metrics.completed}</div>
+                        <div class="stat-number" style="color: #34c759;">${metrics.completed}</div>
                         <div class="stat-label">Completed</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-number" style="color: var(--primary-color);">${metrics.inProgress}</div>
+                        <div class="stat-number" style="color: #0071e3;">${metrics.inProgress}</div>
                         <div class="stat-label">In Progress</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-number" style="color: #ef4444;">${metrics.blocked}</div>
+                        <div class="stat-number" style="color: #ff3b30;">${metrics.blocked}</div>
                         <div class="stat-label">Blocked</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-number" style="color: var(--primary-color);">${metrics.completionRate}%</div>
+                        <div class="stat-number" style="color: #0071e3;">${metrics.completionRate}%</div>
                         <div class="stat-label">Completion Rate</div>
                     </div>
                 `;
@@ -788,7 +854,7 @@
                         </div>
                         <div class="progress-label">
                             <span>${eng.rate}% Complete</span>
-                            <span style="color: var(--primary-color); font-weight: 600;">${eng.completed}/${eng.total}</span>
+                            <span style="color: #0071e3; font-weight: 600;">${eng.completed}/${eng.total}</span>
                         </div>
                     </div>
                 `).join('');
@@ -799,7 +865,7 @@
                 if (this.filteredData.length === 0) {
                     document.getElementById('tableContent').innerHTML = `
                         <div class="empty-state">
-                            <div class="empty-state-icon" style="color: var(--primary-color);">📦</div>
+                            <div class="empty-state-icon">📭</div>
                             <div class="empty-state-title">No Tasks Found</div>
                             <p>Try adjusting your filters</p>
                         </div>
