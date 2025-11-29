@@ -1,0 +1,266 @@
+// Google Apps Script - Multi-Source Dashboard Backend
+// Supports both Team Tracker and Freshservice Ticket data
+
+const TEAM_TRACKER_SHEET = 'Team Tracker'; // Your existing sheet
+const FRESHSERVICE_SHEET = 'Freshservice Tickets'; // New sheet for tickets
+const API_KEY_PROPERTY = 'DASHBOARD_API_KEY';
+
+/**
+ * Initialize API Key (Run this once)
+ */
+function initializeApiKey() {
+  const apiKey = Utilities.getUuid();
+  PropertiesService.getScriptProperties().setProperty(API_KEY_PROPERTY, apiKey);
+  Logger.log('API Key generated: ' + apiKey);
+}
+
+/**
+ * Validate API key
+ */
+function validateApiKey(providedKey) {
+  const storedKey = PropertiesService.getScriptProperties().getProperty(API_KEY_PROPERTY);
+  return providedKey === storedKey && storedKey !== null;
+}
+
+/**
+ * Main GET endpoint handler
+ */
+function doGet(e) {
+  try {
+    if (!validateApiKey(e.parameter.key)) {
+      return createJsonResponse(false, 'Invalid API key', null);
+    }
+
+    const action = e.parameter.action || 'getData';
+    const source = e.parameter.source || 'tracker'; // 'tracker' or 'freshservice'
+    
+    switch(action) {
+      case 'getData':
+        return source === 'freshservice' ? fetchFreshserviceData() : fetchTrackerData();
+      case 'getMetadata':
+        return source === 'freshservice' ? fetchFreshserviceMetadata() : fetchTrackerMetadata();
+      case 'health':
+        return createJsonResponse(true, 'Service healthy', { timestamp: new Date().toISOString() });
+      default:
+        return createJsonResponse(false, 'Unknown action', null);
+    }
+  } catch (error) {
+    logError('doGet', error);
+    return createJsonResponse(false, 'Server error: ' + error.message, null);
+  }
+}
+
+/**
+ * Fetch Team Tracker data
+ */
+function fetchTrackerData() {
+  try {
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const sheet = ss.getSheetByName(TEAM_TRACKER_SHEET);
+    
+    if (!sheet) {
+      return createJsonResponse(false, 'Team Tracker sheet not found', null);
+    }
+
+    const data = sheet.getDataRange().getValues();
+    
+    if (data.length < 2) {
+      return createJsonResponse(false, 'No data found in Team Tracker sheet', null);
+    }
+
+    const headers = data[0];
+    const rows = data.slice(1);
+    
+    const formattedData = rows.map(row => {
+      const obj = {};
+      headers.forEach((header, index) => {
+        obj[header] = row[index] || '';
+      });
+      return obj;
+    }).filter(row => row.Task && row.Task.trim() !== '');
+
+    return createJsonResponse(true, 'Team Tracker data fetched successfully', formattedData);
+
+  } catch (error) {
+    logError('fetchTrackerData', error);
+    return createJsonResponse(false, 'Error fetching tracker data: ' + error.message, null);
+  }
+}
+
+/**
+ * Fetch Freshservice ticket data
+ */
+function fetchFreshserviceData() {
+  try {
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const sheet = ss.getSheetByName(FRESHSERVICE_SHEET);
+    
+    if (!sheet) {
+      return createJsonResponse(false, 'Freshservice sheet not found. Please create a sheet named "' + FRESHSERVICE_SHEET + '"', null);
+    }
+
+    const data = sheet.getDataRange().getValues();
+    
+    if (data.length < 2) {
+      return createJsonResponse(false, 'No data found in Freshservice sheet', null);
+    }
+
+    const headers = data[0];
+    const rows = data.slice(1);
+    
+    // Map Freshservice columns to unified format
+    const formattedData = rows.map(row => {
+      const obj = {};
+      headers.forEach((header, index) => {
+        obj[header] = row[index] || '';
+      });
+      
+      // Create unified format for display
+      return {
+        'ID': obj['ID'] || '',
+        'Type': obj['Type'] || '',
+        'Status': obj['Status'] || '',
+        'Priority': obj['Priority'] || '',
+        'Subject': obj['Subject'] || '',
+        'Description': obj['Description'] || '',
+        'Requester Name': obj['Requester Name'] || obj['Requester Nr'] || '',
+        'Requester Email': obj['Requester Email'] || obj['Requester Er'] || '',
+        'Created Date': obj['Created Date'] || obj['Created Datt'] || '',
+        'Location': obj['Location'] || '',
+        'Urgency': obj['Urgency'] || '',
+        'Impact': obj['Impact'] || '',
+        'Issue Category': obj['Issue Category'] || obj['Issue Catego'] || '',
+        'Source': obj['Source'] || '',
+        'Resolved Date': obj['Resolved Date'] || obj['Resolved Dat'] || '',
+        'Closed Date': obj['Closed Date'] || '',
+        'Function': obj['Function'] || obj['Function/Tez'] || '',
+        'Survey Score': obj['Survey Score'] || '',
+        'Maximum Survey Score': obj['Maximum Survey Score'] || obj['Maximum Su'] || '',
+        'Agent Name': obj['Agent Name'] || ''
+      };
+    }).filter(row => row.ID && row.ID.trim() !== '');
+
+    return createJsonResponse(true, 'Freshservice data fetched successfully', formattedData);
+
+  } catch (error) {
+    logError('fetchFreshserviceData', error);
+    return createJsonResponse(false, 'Error fetching Freshservice data: ' + error.message, null);
+  }
+}
+
+/**
+ * Fetch Team Tracker metadata
+ */
+function fetchTrackerMetadata() {
+  try {
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const sheet = ss.getSheetByName(TEAM_TRACKER_SHEET);
+    
+    if (!sheet) {
+      return createJsonResponse(false, 'Sheet not found', null);
+    }
+
+    const data = sheet.getDataRange().getValues();
+    const headers = data[0];
+    const rows = data.slice(1);
+    
+    const engineerIdx = headers.indexOf('Engineer');
+    const taskIdx = headers.indexOf('Task');
+    const statusIdx = headers.indexOf('Status');
+    
+    const engineers = [...new Set(rows.map(r => r[engineerIdx]).filter(e => e))];
+    const tasks = [...new Set(rows.map(r => r[taskIdx]).filter(t => t))];
+    const statuses = [...new Set(rows.map(r => r[statusIdx]).filter(s => s))];
+
+    return createJsonResponse(true, 'Metadata fetched', {
+      engineers: engineers.sort(),
+      tasks: tasks.sort(),
+      statuses: statuses.sort()
+    });
+
+  } catch (error) {
+    logError('fetchTrackerMetadata', error);
+    return createJsonResponse(false, 'Error fetching metadata: ' + error.message, null);
+  }
+}
+
+/**
+ * Fetch Freshservice metadata
+ */
+function fetchFreshserviceMetadata() {
+  try {
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const sheet = ss.getSheetByName(FRESHSERVICE_SHEET);
+    
+    if (!sheet) {
+      return createJsonResponse(false, 'Freshservice sheet not found', null);
+    }
+
+    const data = sheet.getDataRange().getValues();
+    const headers = data[0];
+    const rows = data.slice(1);
+    
+    // Find column indices
+    const agentIdx = headers.indexOf('Agent Name');
+    const statusIdx = headers.indexOf('Status');
+    const priorityIdx = headers.indexOf('Priority');
+    const typeIdx = headers.indexOf('Type');
+    
+    const agents = [...new Set(rows.map(r => r[agentIdx]).filter(a => a))];
+    const statuses = [...new Set(rows.map(r => r[statusIdx]).filter(s => s))];
+    const priorities = [...new Set(rows.map(r => r[priorityIdx]).filter(p => p))];
+    const types = [...new Set(rows.map(r => r[typeIdx]).filter(t => t))];
+
+    return createJsonResponse(true, 'Freshservice metadata fetched', {
+      agents: agents.sort(),
+      statuses: statuses.sort(),
+      priorities: priorities.sort(),
+      types: types.sort()
+    });
+
+  } catch (error) {
+    logError('fetchFreshserviceMetadata', error);
+    return createJsonResponse(false, 'Error fetching Freshservice metadata: ' + error.message, null);
+  }
+}
+
+/**
+ * Create JSON response
+ */
+function createJsonResponse(success, message, data) {
+  const response = {
+    success: success,
+    message: message,
+    data: data,
+    timestamp: new Date().toISOString()
+  };
+  
+  const output = ContentService.createTextOutput(JSON.stringify(response));
+  output.setMimeType(ContentService.MimeType.JSON);
+  return output;
+}
+
+/**
+ * Error logging
+ */
+function logError(context, error) {
+  try {
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    let errorSheet = ss.getSheetByName('Error Log');
+    
+    if (!errorSheet) {
+      errorSheet = ss.insertSheet('Error Log');
+      errorSheet.appendRow(['Timestamp', 'Context', 'Message', 'Stack', 'User']);
+    }
+    
+    errorSheet.appendRow([
+      new Date(),
+      context,
+      error.message,
+      error.stack || 'No stack trace',
+      Session.getUser().getEmail()
+    ]);
+  } catch (e) {
+    Logger.log('Error logging failed: ' + e.message);
+  }
+}
