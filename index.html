@@ -61,7 +61,7 @@
         <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
             <div class="flex items-center gap-3">
                 <div class="w-2 h-8 bg-executive-gold rounded-full"></div>
-                <h1 class="text-xl font-bold tracking-tight text-white">MoEngage <span class="text-zinc-500 font-light">IT</span></h1>
+                <h1 class="text-xl font-bold tracking-tight text-white">COMMAND <span class="text-zinc-500 font-light">CENTER</span></h1>
             </div>
             <div class="flex items-center gap-4">
                 <span id="lastUpdate" class="text-xs text-zinc-500 font-mono">Synced: --:--</span>
@@ -77,7 +77,7 @@
         <div class="flex flex-col md:flex-row justify-between items-end gap-6 border-b border-white/5 pb-10">
             <div>
                 <h2 class="text-4xl md:text-5xl font-extrabold text-white tracking-tight mb-2">Team Performance</h2>
-                <p class="text-zinc-400">IT metric tracking.</p>
+                <p class="text-zinc-400">Real-time operational intelligence and metric tracking.</p>
             </div>
             <div class="bg-executive-900 p-1 rounded-lg border border-white/10 flex">
                 <button id="trackerToggle" onclick="dashboard.switchDataSource('tracker')" class="px-6 py-2 rounded-md text-sm font-medium transition-all text-zinc-400 hover:text-white">Team Tracker</button>
@@ -146,7 +146,7 @@
 
     <footer class="border-t border-white/5 mt-auto py-8">
         <div class="max-w-7xl mx-auto px-6 text-center text-zinc-600 text-sm">
-            <p>&copy; 2026 IT Operations Dashboard. Internal Use Only.</p>
+            <p>&copy; 2024 IT Operations Dashboard. Internal Use Only.</p>
         </div>
     </footer>
 
@@ -169,13 +169,14 @@
             { 'Task': 'Backend Ops', 'Sub-Task': 'Scaling', 'Engineer': 'Bob Smith', 'Status': 'Not Started', 'Start Date': '2024-11-05', 'Closure Date': '', 'Blocker/Dependency': '' }
         ];
         
+        // Updated Demo Data to match DD/MM/YY HH:mm format for Freshservice
         const DEMO_DATA_FRESHSERVICE = [
-            { 'ID': 1001, 'Type': 'Incident', 'Status': 'Resolved', 'Priority': 'High', 'Subject': 'Network outage in building A', 'Agent Name': 'Alice Johnson', 'Created Date': '2024-11-20 10:00', 'Resolved Date': '2024-11-20 14:00' },
-            { 'ID': 1002, 'Type': 'Service Request', 'Status': 'Open', 'Priority': 'Low', 'Subject': 'Request new laptop for Jane', 'Agent Name': 'Carol Davis', 'Created Date': '2024-11-27 09:00', 'Resolved Date': '' },
-            { 'ID': 1003, 'Type': 'Incident', 'Status': 'Pending', 'Priority': 'Medium', 'Subject': 'Printer in HR broken', 'Agent Name': 'Bob Smith', 'Created Date': '2024-11-28 10:00', 'Resolved Date': '' },
-            { 'ID': 1004, 'Type': 'Service Request', 'Status': 'Closed', 'Priority': 'High', 'Subject': 'Software installation request', 'Agent Name': 'Alice Johnson', 'Created Date': '2024-11-15 11:00', 'Resolved Date': '2024-11-16 12:00' },
-            { 'ID': 1005, 'Type': 'Problem', 'Status': 'On Hold', 'Priority': 'Medium', 'Subject': 'Server license issue', 'Agent Name': 'David Lee', 'Created Date': '2024-10-10 13:00', 'Resolved Date': '' },
-            { 'ID': 1006, 'Type': 'Incident', 'Status': 'Open', 'Priority': 'High', 'Subject': 'Critical website error', 'Agent Name': 'David Lee', 'Created Date': '2024-11-28 15:00', 'Resolved Date': '' },
+            { 'ID': 1001, 'Type': 'Incident', 'Status': 'Resolved', 'Priority': 'High', 'Subject': 'Network outage in building A', 'Agent Name': 'Alice Johnson', 'Created Date': '20/11/24 10:00', 'Resolved Date': '20/11/24 14:00' },
+            { 'ID': 1002, 'Type': 'Service Request', 'Status': 'Open', 'Priority': 'Low', 'Subject': 'Request new laptop for Jane', 'Agent Name': 'Carol Davis', 'Created Date': '27/11/24 09:00', 'Resolved Date': '' },
+            { 'ID': 1003, 'Type': 'Incident', 'Status': 'Pending', 'Priority': 'Medium', 'Subject': 'Printer in HR broken', 'Agent Name': 'Bob Smith', 'Created Date': '28/11/24 10:00', 'Resolved Date': '' },
+            { 'ID': 1004, 'Type': 'Service Request', 'Status': 'Closed', 'Priority': 'High', 'Subject': 'Software installation request', 'Agent Name': 'Alice Johnson', 'Created Date': '15/11/24 11:00', 'Resolved Date': '16/11/24 12:00' },
+            { 'ID': 1005, 'Type': 'Problem', 'Status': 'On Hold', 'Priority': 'Medium', 'Subject': 'Server license issue', 'Agent Name': 'David Lee', 'Created Date': '10/10/24 13:00', 'Resolved Date': '' },
+            { 'ID': 1006, 'Type': 'Incident', 'Status': 'Open', 'Priority': 'High', 'Subject': 'Critical website error', 'Agent Name': 'David Lee', 'Created Date': '28/11/24 15:00', 'Resolved Date': '' },
         ];
 
         class Dashboard {
@@ -201,6 +202,34 @@
                 if (fieldType === 'date') return item['Start Date'] || item['start_date'] || item['Created Date'] || item['created_at'] || '';
                 return '';
             }
+
+            // --- DATE PARSING FIX ---
+            parseDate(dateStr) {
+                if (!dateStr) return null;
+                
+                // Handle Freshservice Format: DD/MM/YY HH:mm or DD/MM/YY
+                // Detects if date has "/" (Standard ISO usually has "-")
+                if (dateStr.includes('/')) {
+                    // Split date and time (if exists)
+                    const [dPart, tPart] = dateStr.split(' ');
+                    const [day, month, year] = dPart.split('/');
+                    
+                    if (day && month && year) {
+                        // Handle 2 digit year (assume 20xx)
+                        const fullYear = year.length === 2 ? '20' + year : year;
+                        
+                        // If time exists
+                        if (tPart) {
+                            return new Date(`${fullYear}-${month}-${day}T${tPart}:00`);
+                        }
+                        return new Date(`${fullYear}-${month}-${day}`);
+                    }
+                }
+                
+                // Fallback for Team Tracker (Standard ISO)
+                return new Date(dateStr);
+            }
+            // ------------------------
 
             async switchDataSource(source, reload = true) {
                 this.currentSource = source;
@@ -245,12 +274,11 @@
                 finally { if(refreshIcon) refreshIcon.classList.remove('animate-spin'); }
             }
 
-            // === TILE INTERACTION LOGIC ===
             toggleStatusTile(statusName) {
                 if (this.filters.statusTile === statusName) {
-                    this.filters.statusTile = null; // Deselect
+                    this.filters.statusTile = null; 
                 } else {
-                    this.filters.statusTile = statusName; // Select
+                    this.filters.statusTile = statusName; 
                 }
                 this.applyFilters();
                 this.render();
@@ -269,14 +297,20 @@
                     filtered = filtered.filter(item => this.filters.engineers.includes(this.getFieldValue(item, 'engineer')));
                 }
 
-                // 3. Date Filter
+                // 3. Date Filter (Using new parseDate logic)
                 if (this.filters.dateRange.start && this.filters.dateRange.end) {
+                    // Create start/end dates set to midnight
                     const start = new Date(this.filters.dateRange.start);
+                    start.setHours(0,0,0,0);
+                    
                     const end = new Date(this.filters.dateRange.end);
+                    end.setHours(23,59,59,999);
+
                     filtered = filtered.filter(item => {
                         const dateStr = this.getFieldValue(item, 'date');
-                        if(!dateStr) return false;
-                        const date = new Date(dateStr);
+                        const date = this.parseDate(dateStr); // Use custom parser
+                        if (!date || isNaN(date.getTime())) return false;
+                        
                         return date >= start && date <= end; 
                     });
                 }
@@ -295,18 +329,18 @@
                 this.applyFilters(); this.render();
             }
 
-            // --- HELPER METRICS ---
-            // Calculates counts of EVERY status present in the context (ignoring the tile selection itself)
             getStatusCounts() {
-                // Base context: Date Range + Engineer selection
                 let contextData = this.data;
 
                 if (this.filters.dateRange.start && this.filters.dateRange.end) {
                      const start = new Date(this.filters.dateRange.start);
+                     start.setHours(0,0,0,0);
                      const end = new Date(this.filters.dateRange.end);
+                     end.setHours(23,59,59,999);
+                     
                      contextData = contextData.filter(item => {
-                        const d = this.getFieldValue(item, 'date');
-                        return d && new Date(d) >= start && new Date(d) <= end;
+                        const d = this.parseDate(this.getFieldValue(item, 'date')); // Use custom parser
+                        return d && d >= start && d <= end;
                      });
                 }
                 if (this.filters.engineers.length > 0) {
@@ -314,8 +348,6 @@
                 }
 
                 const counts = { total: contextData.length, statuses: {} };
-                
-                // Initialize counts for known statuses in metadata to 0, or just build dynamically
                 this.metadata.statuses.forEach(s => counts.statuses[s] = 0);
 
                 contextData.forEach(item => {
@@ -337,18 +369,17 @@
                     stats[name].total++;
                     if (completedStatuses.includes(item.Status)) stats[name].completed++;
                 });
-                // Sorted by TOTAL (Highest Volume) first, then Rate
                 return Object.entries(stats).map(([name, data]) => ({
                     name, ...data, rate: data.total > 0 ? Math.round((data.completed / data.total) * 100) : 0
                 })).sort((a, b) => {
-                    if (b.total !== a.total) return b.total - a.total; // Sort by Volume High -> Low
-                    return b.rate - a.rate; // Tie-break by Rate
+                    if (b.total !== a.total) return b.total - a.total; 
+                    return b.rate - a.rate; 
                 });
             }
 
             render() {
-                this.renderStats(); // Render Tiles
-                this.renderFilters(); // Render Agent List (Reactive to tiles)
+                this.renderStats(); 
+                this.renderFilters(); 
                 this.renderEngineerSection();
                 this.renderTable();
                 if (window.lucide) window.lucide.createIcons();
@@ -368,7 +399,6 @@
                 }
             }
 
-            // Styling helper for dynamic status cards
             getStatusStyle(status) {
                 const s = status.toLowerCase();
                 if (['completed', 'resolved', 'closed'].some(x => s.includes(x))) return { text: 'text-emerald-400', bg: 'bg-emerald-500/10', icon: 'check-circle' };
@@ -380,11 +410,8 @@
 
             renderStats() {
                 const metrics = this.getStatusCounts(); 
-                
-                // Helper to check if tile is active
                 const isActive = (name) => this.filters.statusTile === name ? 'tile-active' : '';
 
-                // 1. Total Card (Always First)
                 let html = `
                     <div class="bg-executive-900 border border-white/5 rounded-xl p-4 shadow-lg group cursor-default">
                         <div class="flex justify-between items-start">
@@ -394,9 +421,6 @@
                     </div>
                 `;
 
-                // 2. Dynamic Status Cards
-                // We use metadata.statuses to ensure we generate tiles for everything available in the dataset
-                // even if count is 0 in current view (optional preference, here we show what's in context)
                 const statusesToShow = Object.keys(metrics.statuses).sort();
 
                 statusesToShow.forEach(status => {
@@ -475,13 +499,11 @@
                 }
                 const getBadge = (s) => {
                     const style = this.getStatusStyle(s);
-                    // Extract color classes from the style object for the badge
                     let badgeClass = 'bg-zinc-800 text-zinc-300';
                     if (style.text.includes('emerald')) badgeClass = 'bg-emerald-900/30 text-emerald-400';
                     else if (style.text.includes('indigo')) badgeClass = 'bg-indigo-900/30 text-indigo-400';
                     else if (style.text.includes('amber')) badgeClass = 'bg-amber-900/30 text-amber-400';
                     else if (style.text.includes('red')) badgeClass = 'bg-red-900/30 text-red-400';
-                    
                     return `<span class="px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider border border-transparent ${badgeClass}">${s}</span>`;
                 };
                 let th, tr;
